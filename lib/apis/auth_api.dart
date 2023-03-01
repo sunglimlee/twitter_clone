@@ -2,6 +2,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as model;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:twitter_clone/constants/appwrite_constants.dart';
 import 'package:twitter_clone/core/core.dart';
 import 'package:twitter_clone/core/providers.dart';
 
@@ -10,7 +11,8 @@ import 'package:twitter_clone/core/providers.dart';
 // account 는 어디서 오는가? 분명히 여러값을 넣은 provider 로 형태로 오지 않을까? 맞다. Provider 로 데이터를 전달한다.
 final authAPIProvider = Provider<AuthAPI>((ref) {
   final appWriteAccountWatch = ref.watch(appWriteAccountProvider);
-  return AuthAPI(account: appWriteAccountWatch);
+  //return AuthAPI(account: appWriteAccountWatch);
+  return AuthAPI();
   }
 );
 // 기뻐해 주세요. 드디어 Riverpod provider 를 사용하고 있습니다.  원하는 객체를 만들어서 널리 사용할 수 있도록 tree 에 올려주고 있습니다.
@@ -38,9 +40,16 @@ class AuthAPI implements IAuthAPI {
   // 기억하자 지금 Authentication 하기 때문에 appWrite.dart 에서 제공하는 Account 를 사용해야 한다.
   // 이 객체를 사용함으로써 이제부터 AppWrite 에서 제공해주는 여러 함수를 다 사용할 수 있게 된다.
   // 상식적으로 생각해봐라. 여러가지 Account 에 대한 정보가 있을거잖아.. 그중하나가 User id 일거고..
-  final Account _account;
+  late Account _account;
 
-  AuthAPI({required Account account}) : _account = account;
+  // AuthAPI({required Account account}) : _account = account;
+  AuthAPI() {
+    Client client = Client(endPoint: AppWriteConstants.endPoint);
+    client.setProject(AppWriteConstants.projectId);
+    client.setSelfSigned(status: true); // 개발하는 시점에만 true 라고 해야 한단다.
+    _account = Account(client);
+
+  }
 
   @override
   Future<model.Account?> currentUserAccount() async {
