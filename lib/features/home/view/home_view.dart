@@ -13,7 +13,7 @@ class HomeView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return const Scaffold(
-      body: Center(child: Text("AnW", style: TextStyle(color: Colors.red),)),
+      body: Center(child: Text("AnW2", style: TextStyle(color: Colors.red),)),
     );
   }
 }
