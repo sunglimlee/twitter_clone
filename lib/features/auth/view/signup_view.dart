@@ -4,15 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twitter_clone/common/common.dart';
 import 'package:twitter_clone/common/loading_page.dart';
 import 'package:twitter_clone/constants/constants.dart';
-import 'package:twitter_clone/features/auth/controller/auth_controller.dart';
 import 'package:twitter_clone/features/auth/view/login_view.dart';
 import 'package:twitter_clone/features/auth/widgets/auth_field.dart';
 import 'package:twitter_clone/theme/pallete.dart';
 
-class SignupView extends ConsumerStatefulWidget {
-  static materialPageRoute() =>
-      MaterialPageRoute(builder: (context) => const SignupView());
+import '../controller/auth_cotroller.dart';
 
+class SignupView extends ConsumerStatefulWidget {
   const SignupView({Key? key}) : super(key: key);
 
   @override
@@ -100,7 +98,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 Navigator.push(context,
-                                    LoginView.materialPageRoute());
+                                    MaterialPageRoute(builder: (context)=>const LoginView()));
                               }),
                       ]),
                 ),

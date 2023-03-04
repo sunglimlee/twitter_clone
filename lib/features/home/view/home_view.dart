@@ -7,10 +7,6 @@ import 'package:twitter_clone/features/tweet/view/create_tweet_view.dart';
 import 'package:twitter_clone/theme/pallete.dart';
 
 class HomeView extends StatefulWidget {
-  static materialPageRoute() {
-    return MaterialPageRoute(builder: (context) => const HomeView());
-  }
-
   const HomeView({Key? key}) : super(key: key);
 
   @override
@@ -28,7 +24,8 @@ class _HomeViewState extends State<HomeView> {
   }
 
   onCreateTweet() {
-    Navigator.push(context, CreateTweetView.materialPageRoute());
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const CreateTweetScreen()));
   }
 
   @override

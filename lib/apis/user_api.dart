@@ -30,13 +30,17 @@ class UserAPI implements IUserAPI {
   UserAPI({required Databases db}) : _db = db;
 
   @override
-  Future<model.Document> getUserData(String uid) async {
+  Future<model.Document> getUserData(String? uid) async {
     try {
-      final document = await _db.getDocument(
-          databaseId: AppWriteConstants.databaseId,
-          collectionId: AppWriteConstants.usersCollection,
-          documentId: uid); // 여기에 uid 를 넣는다는건 알겠는데 앞에서 ID.unique() 를 둘 다 해주었는데 매치가 되나????
-      return document;
+      if (uid != null) {
+        final document = await _db.getDocument(
+            databaseId: AppWriteConstants.databaseId,
+            collectionId: AppWriteConstants.usersCollection,
+            documentId: uid); // 여기에 uid 를 넣는다는건 알겠는데 앞에서 ID.unique() 를 둘 다 해주었는데 매치가 되나????
+        return document;
+      } else {
+        throw AppwriteException("오류가 발생");
+      }
     } on AppwriteException catch (e, st) {
       throw AppwriteException(e.message, e.code); // 여기서 오류를 던졌는데
     } catch (e, st) {

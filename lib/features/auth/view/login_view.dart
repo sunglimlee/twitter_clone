@@ -4,17 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twitter_clone/common/common.dart';
 import 'package:twitter_clone/common/loading_page.dart';
 import 'package:twitter_clone/constants/constants.dart';
-import 'package:twitter_clone/features/auth/controller/auth_controller.dart';
 import 'package:twitter_clone/features/auth/view/signup_view.dart';
 import 'package:twitter_clone/features/auth/widgets/auth_field.dart';
 import 'package:twitter_clone/theme/pallete.dart';
 
+import '../controller/auth_cotroller.dart';
+
 // dispose() 를 사용하기 위해서 StatefulWidget 을 사용한다.
 class LoginView extends ConsumerStatefulWidget {
-  static materialPageRoute() {
-    return MaterialPageRoute(builder: (context) => const LoginView());
-  }
-
   const LoginView({Key? key}) : super(key: key);
 
   @override
@@ -25,8 +22,8 @@ class _LoginViewState extends ConsumerState<LoginView> {
   // 여기서 잘보자. appBar 인스턴스를 하나 만들었으므로 이제 이걸 build 할 때마다 계속 사용하는거다.
   // 기존처럼 계속 function 을 호출하는게 아니다.
   final appbar = UIConstants.appBar();
-  final emailTextEditingController = TextEditingController();
-  final passwordTextEditingController = TextEditingController();
+  final emailTextEditingController = TextEditingController(text: "steve.patriot@gmail.com");
+  final passwordTextEditingController = TextEditingController(text: "lsll4457");
 
   @override
   void dispose() {
@@ -101,7 +98,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 Navigator.push(
-                                    context, SignupView.materialPageRoute());
+                                    context, MaterialPageRoute(builder: (context)=>const SignupView()));
                               }),
                       ]),
                 ),

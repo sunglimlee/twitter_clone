@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:appwrite/models.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:twitter_clone/apis/auth_api.dart';
@@ -24,12 +25,16 @@ final authControllerProvider = StateNotifierProvider<AuthController, bool>(
 // 근데 이걸 provider 에 올려놓으면 나중에 언제라도 사용할 수 있으니깐 좀더 편리해 진다는 거지..
 final currentUserAccountProvider = FutureProvider((ref) {
   final authControllerWatch = ref.watch(authControllerProvider.notifier);
-  return authControllerWatch.currentUserAccount();
+  final result = authControllerWatch.currentUserAccount();
+  //print(result.then((value) => print("email 값은 : ${value}")));
+  return result;
 });
 
 // 이걸 꼭 provider 에다가 이렇게 올려놓고 언제나 사용 가능 하도록 해야하나?
 final currentUserDetailProvider = FutureProvider((ref) {
-  final currentUserIdWatch = ref.watch(currentUserAccountProvider).value!.$id;
+  print("여기는");
+  final currentUserIdWatch = ref.watch(currentUserAccountProvider).value?.$id;
+  // 위에게 null 이 나오는 이유를 알아야 한다.
   final getUserDetailProviderWatch = ref.watch(getUserDetailProvider(currentUserIdWatch));
   return getUserDetailProviderWatch.value;
 });
@@ -41,7 +46,7 @@ final currentUserDetailProvider = FutureProvider((ref) {
 // 여기서 잘보면 이 provider 는 reusable 이다. 왜냐면 uid 를 넣는거에 따라서 값이 달라지기 때문에
 // 그러면 uid 를 어떻게 하면 provider 에 넣어줄 수 있을까?
 // family 로 넣어줄 수 있다. 아니면 객체로.. 아니면 다른게 있었는데..
-final getUserDetailProvider = FutureProvider.family<UserModel, String>((ref, String uid) {
+final getUserDetailProvider = FutureProvider.family<UserModel, String?>((ref, String? uid) {
   // StateNotifierProvider 안의 함수를 실행하기 위해서 notifier 를 사용한다.
   final authControllerWatch = ref.watch(authControllerProvider.notifier);
   //print('uid 값은 ${uid}');
@@ -108,7 +113,7 @@ class AuthController extends StateNotifier<bool> {
       final result2 = await _userAPI.saveUserData(userModel: userModel);
       result2.fold((l) => showSnackBar(context, l.message.toString()), (r) {
         showSnackBar(context, 'Account created! Please log in.');
-        Navigator.push(context, LoginView.materialPageRoute());
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>const LoginView()));
       });
     });
   }
@@ -125,22 +130,25 @@ class AuthController extends StateNotifier<bool> {
     });
     //state = false;
     result.fold((l) => showSnackBar(context, l.message), (r) {
-      Navigator.push(context, HomeView.materialPageRoute());
+      Navigator.push(context, MaterialPageRoute(builder: (context)=>const HomeView()));
     }); // userid 를 사용하도록 하자.⭐⭐⭐⭐⭐️
   }
 
   // 이제는 model.Account or null 이 리턴된다.
-  Future<model.Account?> currentUserAccount() {
+  Future<model.Account?> currentUserAccount() async {
     // 이 값을 그대로 던져줘도 되고 여기서 내가 원하는 객체로 바꾸어서 던져주어도 되고..지금 필요로 하는건 말그래도 Account 와 Exception 이므로
     // 지금은 그대로 데이터를 넘겨주는게 맞는거 같다.
-    return _authAPI.currentUserAccount();
+    print("auth_controller 부분과 currentUsrAccount() 함수 부분");
+    final result = await _authAPI.currentUserAccount();
+    print("auth_controller, currentUserAccount() 부분: ${result}");
+    return result;
   }
 
   // 이 함수가 다 이해되는데 한가지 usrModel 이 리턴되는데 왜 Future<UserModel> 을 리턴값으로 가져가는걸까?
   // Future 를 지워보니깐
   // Functions marked 'async' must have a return type assignable to 'Future'.
   // 이 말은 함수이기 때문에 무조건 Future 를 해주어야 한다는 거지.. 왜냐면 이 함수가 async 이니깐 나중에 값이 나올텐데.. 라는 전제가 들어 있으니깐 무조건 Future<UserModel> 이 되어야 한다.
-  Future<UserModel> getUserData(String uid) async {
+  Future<UserModel> getUserData(String? uid) async {
     final document = await _userAPI.getUserData(uid);
     UserModel userModel = UserModel.fromJson(document.data);
     return userModel;
