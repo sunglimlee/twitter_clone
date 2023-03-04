@@ -16,4 +16,14 @@ class UIConstants {
       centerTitle: true,
     );
   }
+  // 나는 ui_constants 에 않넣고 여기에다가 넣었다.
+  static List<Widget> childrenForIndexedStack() {
+    final children = [
+      Text('Home Screen'),
+      Text('Search Screen'),
+      Text('Notificatin Screen'),
+    ];
+    return children;
+  }
+
 }
