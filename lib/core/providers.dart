@@ -1,5 +1,6 @@
 // I'm gonna put the common kind of providers for this project
 import 'package:appwrite/appwrite.dart';
+import 'package:appwrite/models.dart'as models;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twitter_clone/constants/appwrite_constants.dart';
 
@@ -21,4 +22,22 @@ final appWriteAccountProvider = Provider<Account>((ref) {
 
 final appWriteDatabasesProvider = Provider<Databases>((ref) {
   return Databases(ref.watch(appWriteClientProvider));
+});
+
+// state 프로바이더
+final sessionStateProvider = StateProvider<models.Session?>((ref) {
+  models.Session? session;
+  return session;
+});
+
+// storage provider
+final appWriteStorageProvider = Provider<Storage>((ref) {
+  final appWriteClientWatch = ref.watch(appWriteClientProvider);
+  return Storage(appWriteClientWatch);
+});
+
+// Realtime
+final appWriteRealtimeProvider = Provider<Realtime>((ref) {
+  final appWriteClientWatch = ref.watch(appWriteClientProvider);
+  return Realtime(appWriteClientWatch);
 });

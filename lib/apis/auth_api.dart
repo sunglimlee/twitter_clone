@@ -30,8 +30,12 @@ class AuthAPI implements IAuthAPI {
   @override
   Future<model.Account?> currentUserAccount() async {
     try {
-      return await _account.get();
-    } on AppwriteException {
+      print("before result (currentUserAccount)[auth_api.dart]");
+      final result = await _account.get();
+      print("result (currentUserAccount)[auth_api.dart] ${result.toString()}");
+      return result;
+    } on AppwriteException catch (e, stacktrace) {
+      print(e.message.toString());
       return null;
     } catch (e) {
       return null;
@@ -52,11 +56,11 @@ class AuthAPI implements IAuthAPI {
       return right(account);
     } on AppwriteException catch (e, stackTrace) {
       return left(
-        Failure(message: e.message ?? 'Some unexpected error occurred',stackTrace: stackTrace),
+        Failure(message: e.message ?? 'Some unexpected error occurred', stackTrace: stackTrace),
       );
     } catch (e, stackTrace) {
       return left(
-        Failure(message:  e.toString(), stackTrace:  stackTrace),
+        Failure(message: e.toString(), stackTrace: stackTrace),
       );
     }
   }
@@ -74,11 +78,11 @@ class AuthAPI implements IAuthAPI {
       return right(session);
     } on AppwriteException catch (e, stackTrace) {
       return left(
-        Failure(message:   e.message ?? 'Some unexpected error occurred', stackTrace:  stackTrace),
+        Failure(message: e.message ?? 'Some unexpected error occurred', stackTrace: stackTrace),
       );
     } catch (e, stackTrace) {
       return left(
-        Failure(message:  e.toString(),stackTrace:  stackTrace),
+        Failure(message: e.toString(), stackTrace: stackTrace),
       );
     }
   }
@@ -92,7 +96,7 @@ class AuthAPI implements IAuthAPI {
       return right(null);
     } on AppwriteException catch (e, stackTrace) {
       return left(
-        Failure(message:  e.message ?? 'Some unexpected error occurred',stackTrace:  stackTrace),
+        Failure(message: e.message ?? 'Some unexpected error occurred', stackTrace: stackTrace),
       );
     } catch (e, stackTrace) {
       return left(

@@ -5,20 +5,14 @@ import 'package:twitter_clone/features/auth/view/login_view.dart';
 import 'package:twitter_clone/features/auth/view/signup_view.dart';
 import 'package:twitter_clone/features/home/view/home_view.dart';
 import 'package:twitter_clone/theme/theme.dart';
-import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:appwrite/models.dart' as model;
 
 import 'features/auth/controller/auth_cotroller.dart';
 
-
-
 void main() {
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }
+
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
@@ -27,6 +21,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       title: 'Twitter Clone',
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
       home: ref.watch(currentUserAccountProvider).when(
         data: (user) {
@@ -38,7 +33,9 @@ class MyApp extends ConsumerWidget {
         error: (error, st) => ErrorPage(
           errorMessage: error.toString(),
         ),
-        loading: () => const LoadingPage(),
+        loading: () {
+          //print(currentUserAccountProvider.toString());
+          return const LoadingPage();},
       ),
     );
   }

@@ -17,7 +17,7 @@ _$_UserModel _$$_UserModelFromJson(Map<String, dynamic> json) => _$_UserModel(
           .toList(),
       profilePic: json['profile_pic'] as String?,
       bannerPic: json['banner_pic'] as String?,
-      uid: json['\$id'] as String?, // 여기서 내가 임으로 값을 바꾸었다.
+      uid: json['uid'] as String?,
       bio: json['bio'] as String?,
       isTwitterBlue: json['is_twitter_blue'] as bool? ?? false,
     );
@@ -30,7 +30,7 @@ Map<String, dynamic> _$$_UserModelToJson(_$_UserModel instance) =>
       'following': instance.following,
       'profile_pic': instance.profilePic,
       'banner_pic': instance.bannerPic,
-      // 'uid': instance.uid,
+      'uid': instance.uid,
       'bio': instance.bio,
       'is_twitter_blue': instance.isTwitterBlue,
     };

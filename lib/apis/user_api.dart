@@ -31,12 +31,14 @@ class UserAPI implements IUserAPI {
 
   @override
   Future<model.Document> getUserData(String? uid) async {
+    print('in getUserData in user_api.dart : ${uid}');
     try {
       if (uid != null) {
         final document = await _db.getDocument(
             databaseId: AppWriteConstants.databaseId,
             collectionId: AppWriteConstants.usersCollection,
             documentId: uid); // 여기에 uid 를 넣는다는건 알겠는데 앞에서 ID.unique() 를 둘 다 해주었는데 매치가 되나????
+        print('document in getUserData in User_api.dart : ${document.data.toString()}');
         return document;
       } else {
         throw AppwriteException("오류가 발생");

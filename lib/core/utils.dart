@@ -29,10 +29,10 @@ String getNameFromEmail(String email) {
 }
 
 Future<List<File>> pickImages() async {
-  List<File> images = [];
-  final ImagePicker picker = ImagePicker();
-  final imageFiles = await picker.pickMultiImage();
-  if (imageFiles.isNotEmpty) {
+  List<File> images = []; // 언제나 그렇듯 로컬변수 선언하고 초기화하고
+  final ImagePicker picker = ImagePicker(); // image picker 객체 만들고
+  final imageFiles = await picker.pickMultiImage(); // 화면에 보여주고
+  if (imageFiles.isNotEmpty) { // 선택한게 있으면
     for (final image in imageFiles) {
       images.add(File(image.path)); // xfile 인데 어떻게 file 로 변환이 되는거지?
     }

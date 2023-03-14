@@ -26,7 +26,8 @@ mixin _$UserModel {
   List<String>? get following => throw _privateConstructorUsedError;
   String? get profilePic => throw _privateConstructorUsedError;
   String? get bannerPic => throw _privateConstructorUsedError;
-  String? get uid => throw _privateConstructorUsedError;
+  String? get uid =>
+      throw _privateConstructorUsedError; // AppWrite 가 자동으로 저장할 것이다.
   String? get bio => throw _privateConstructorUsedError;
   bool get isTwitterBlue => throw _privateConstructorUsedError;
 
@@ -248,6 +249,7 @@ class _$_UserModel implements _UserModel {
   final String? bannerPic;
   @override
   final String? uid;
+// AppWrite 가 자동으로 저장할 것이다.
   @override
   final String? bio;
   @override
@@ -337,7 +339,7 @@ abstract class _UserModel implements UserModel {
   String? get bannerPic;
   @override
   String? get uid;
-  @override
+  @override // AppWrite 가 자동으로 저장할 것이다.
   String? get bio;
   @override
   bool get isTwitterBlue;
