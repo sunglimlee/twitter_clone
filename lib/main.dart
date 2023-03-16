@@ -19,6 +19,7 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    print('myApp');
     return MaterialApp(
       title: 'Twitter Clone',
       debugShowCheckedModeBanner: false,

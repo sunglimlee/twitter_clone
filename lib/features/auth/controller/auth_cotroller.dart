@@ -20,8 +20,7 @@ import 'package:twitter_clone/model/user_model.dart';
 import '../view/signup_view.dart';
 
 
-final authControllerProvider =
-StateNotifierProvider<AuthController, bool>((ref) {
+final authControllerProvider = StateNotifierProvider<AuthController, bool>((ref) {
   return AuthController(
     authAPI: ref.watch(authAPIProvider),
     userAPI: ref.watch(userAPIProvider),
@@ -33,19 +32,19 @@ final currentUserDetailsProvider = FutureProvider.autoDispose((ref) async {
 
   final currentUserId = ref.watch(currentUserAccountProvider).value!.$id;
   //final currentUserId = ref.watch(currentUserIdProvider).value;
-  print('currentUserId ${currentUserId}'); // currentUserId 존재하는데???
+  //print('currentUserId ${currentUserId}'); // currentUserId 존재하는데???
   final userDetails = ref.watch(userDetailsProvider(currentUserId));
-  print('userDetails : ${userDetails.value?.email??"값이 존재하지 않습니다."}');
+  //print('userDetails : ${userDetails.value?.email??"값이 존재하지 않습니다."}');
   return userDetails.value;
 });
 
 final userDetailsProvider = FutureProvider.autoDispose.family((ref, String uid) async {
-  print('uuuuuuu');
-  print('in userDetaisProvider : ${uid}');
+  //print('uuuuuuu');
+  //print('in userDetaisProvider : ${uid}');
   final authController = ref.watch(authControllerProvider.notifier);
-  print('authController 값 (userDetailsProvider)[auth_controller] : ${authController.toString()??"authController  값이 존재하지 않습니다."}');
+  //print('authController 값 (userDetailsProvider)[auth_controller] : ${authController.toString()??"authController  값이 존재하지 않습니다."}');
   final result = await authController.getUserData(uid);
-  print('result of authoController.getUserData(uid) [auth_controller] ${result.email}');
+  //print('result of authoController.getUserData(uid) [auth_controller] ${result.email}');
   return result;
 });
 
@@ -158,11 +157,11 @@ class AuthController extends StateNotifier<bool> {
   }
 
   Future<UserModel> getUserData(String uid) async {
-    print('in getUserData : ${uid}');
+    //print('in getUserData : ${uid}');
     final document = await _userAPI.getUserData(uid);
-    print('document (getUserData)[auth_controller] ${document.data.toString()}');
+    //print('document (getUserData)[auth_controller] ${document.data.toString()}');
     final updatedUser = UserModel.fromJson(document.data);
-    print('updatedUser.email (getUserData)[auth_controller] ${updatedUser.email}');
+    //print('updatedUser.email (getUserData)[auth_controller] ${updatedUser.email}');
     return updatedUser;
   }
 

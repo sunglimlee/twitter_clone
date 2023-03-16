@@ -33,7 +33,7 @@ class _CarouselImageState extends State<CarouselImage> {
                 //height: 400, // 여기를 없애자.. 그럼 알아서 들어간다.
                 viewportFraction: 0.8, // 그림 하나를 화면에 보여주는 비율 나머지 0.3 은 다른 그림이 조금씩 차지..
                 enableInfiniteScroll: false,
-                onPageChanged: (index, reson) {
+                onPageChanged: (index, reason) {
                   setState(() {
                     _current = index; // 나중에 이 값에 대해서 뭔가를 하기 위해서 꼭 필요하구나..
                   });

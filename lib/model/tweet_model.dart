@@ -19,6 +19,7 @@ class TweetModel with _$TweetModel {
     List<String>? likes,
     List<String>? commentIds,
     String? id,
+    String? retweetedBy,
     int? reshareCount,
   }) = _TweetModel;
 

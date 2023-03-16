@@ -24,6 +24,11 @@ abstract class ITweetAPI {
 
   FutureEither<model.Document> likeTweet(
       TweetModel tweetModel); // 그냥 TweetModel 을 전체를 다 받는구나.. 그래도 되지..
+
+  FutureEither<model.Document> updateReshareCount(
+      TweetModel tweetModel); // 그냥 TweetModel 을 전체를 다 받는구나.. 그래도 되지..
+
+
 }
 
 class TweetAPI implements ITweetAPI {
@@ -98,5 +103,26 @@ class TweetAPI implements ITweetAPI {
       return Either.left(Failure(message: e.toString(), stackTrace: st));
 
     }
+  }
+
+  @override
+  FutureEither<model.Document> updateReshareCount(TweetModel tweetModel) async {
+    try {
+      final document = await _db.updateDocument(databaseId: AppWriteConstants.databaseId,
+          collectionId: AppWriteConstants.tweetsCollection,
+          documentId: tweetModel.id!,
+          data: {
+            'reshareCount' : tweetModel.reshareCount // 그럼 이말은 tweetModel 에 값을 변경해서 넘겨주어야 한다는거네..
+          }
+      );
+      return right(document);
+    } on AppwriteException catch (e, st) {
+      // 메세지 보여주고, 아니면 print 문 찍고
+      return left(Failure(message: e.message.toString(), stackTrace: st));
+    } catch (e, st) {
+      return Either.left(Failure(message: e.toString(), stackTrace: st));
+
+    }
+
   }
 }

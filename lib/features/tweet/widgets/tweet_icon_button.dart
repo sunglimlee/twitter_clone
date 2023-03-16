@@ -17,6 +17,7 @@ class TweetIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: _onTap,
       child: Row(
         children: [
           SvgPicture.asset(_pathName, color: Pallete.greyColor,),

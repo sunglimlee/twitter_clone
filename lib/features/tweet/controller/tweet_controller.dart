@@ -22,6 +22,7 @@ final tweetStateNotifierProvider =
             tweetAPI: ref.watch(tweetAPIProvider),
             storageAPI: ref.watch(storageAPIProvider)));
 
+// 한번 state 만들면 그걸로 끝이다. dispose 되기 전까지 state 가 유지된다. 심지어 바꿀수도 잇슴..
 final getTweetsProvider = FutureProvider.autoDispose((ref) {
   final tweetStateNotifierWatch = ref.watch(
       tweetStateNotifierProvider.notifier); // 이말 정확히 이해되지? 프로바이더에서 watch 를 받았다.
@@ -41,8 +42,8 @@ final getLatestTweetProvider =
 class TweetControllerNotifier extends StateNotifier<bool> {
   final TweetAPI _tweetAPI;
   final StorageAPI _storageAPI;
+  final Ref _ref; // 여기서 만들 때 ref 를 어떻게 넣는지 보자.. 아마도 provider 에서 값을 넣을 것 같지..
 
-  Ref _ref; // 여기서 만들 때 ref 를 어떻게 넣는지 보자.. 아마도 provider 에서 값을 넣을 것 같지..
   TweetControllerNotifier(
       {required Ref ref,
       required TweetAPI tweetAPI,
@@ -110,7 +111,6 @@ class TweetControllerNotifier extends StateNotifier<bool> {
     print('res 값 ${res}');
     res.fold((l) => showSnackBar(context, l.message), (r) {
       //_ref.refresh(tweetStateNotifierProvider);
-
     });
   }
 
@@ -179,32 +179,36 @@ class TweetControllerNotifier extends StateNotifier<bool> {
   }
 
   void likeTweet(TweetModel tweetModel, UserModel userModel) async {
-    print(
-        'userModel.uid! ${userModel.uid ?? 'userModel.uid 의 값이 존재하지 않습니다.'}: (likeTweet)[tweet_controller.dart]');
-    print('tweetModel (likeTweet)[tweet_controller] ${tweetModel.toString()}');
+//    print('userModel.uid! ${userModel.uid ?? 'userModel.uid 의 값이 존재하지 않습니다.'}: (likeTweet)[tweet_controller.dart]');
+//    print('tweetModel (likeTweet)[tweet_controller] ${tweetModel.toString()}');
     List<String> likes = [];
     likes = tweetModel.likes ?? [];
-    print('likes 의 형 (likeTweet)[tweet_controller] : ${likes.toString()}');
+//    print('likes 의 형 (likeTweet)[tweet_controller] : ${likes.toString()}');
     if (tweetModel.likes != null) {
-      print(
-          'tweetModel 전체 (likeTweet)[tweet_controller] : ${tweetModel.likes.toString()}');
+      //print('tweetModel 전체 (likeTweet)[tweet_controller] : ${tweetModel.likes.toString()}');
       if (tweetModel.likes!.contains(userModel.uid)) {
+        // 이미 좋아요를 눌렀다면..
         //likes.remove(userModel.uid);
-        likes = List.from(likes)..remove(userModel.uid!);
-        print('likes after remove : ${likes.toString()}');
+        likes = List.from(likes)..remove(userModel.uid!); // 여기서 지워야겠지..
+        //print('likes after remove : ${likes.toString()}');
       } else {
+        // 아직 좋아요 아니라면
         //likes = .add(userModel.uid!);
-        likes = List.from(likes)..add(userModel.uid!);
+        likes = List.from(likes)..add(userModel.uid!); // 추가해야겠지..
         print('likes after add : ${likes.toString()}');
         // likes 가 immutable 이라고 add 가 안된다.
       }
     }
     // 이제 tweetModel 을 업데이트 해야하는데 꼭 기억할게 이건 immutable 라는 사실이다.
     // 그래서 copyWith 를 반드시 사용하도록 하자.
-    tweetModel = tweetModel.copyWith(likes: likes);
-    print(
-        'tweetModel 전체 (likeTweet)[tweet_controller] : ${tweetModel.likes.toString()}');
-    final res = await _tweetAPI.likeTweet(tweetModel);
+    // ㅎㅎg 왜 tweetModel 을 업데이트 해야하는지 알고 있지? 외부에서 이 tweetModel 을 가지고 색깔을 변경하기 때문이다.
+    tweetModel = tweetModel.copyWith(
+        likes: likes); // 이게 가장 핵심이네.. 이게 보이네.. 이제.. 이게 보여.. ui 를 위해서
+    //print('tweetModel 전체 (likeTweet)[tweet_controller] : ${tweetModel.likes.toString()}');
+    final res = await _tweetAPI.likeTweet(tweetModel); // 여기는 서버에 관련된것..
+
+    // 위에꺼 tweetModel 이 결국 state 가 계속 유지되면서 값을 바꾸고 있는거네..
+
     // 여기부터 fold 함수 사용할 것임..
     res.fold((l) {
       return null; // 아무것도 보여줄게 없다.
@@ -214,5 +218,19 @@ class TweetControllerNotifier extends StateNotifier<bool> {
 
     // likes.add(userModel.uid!); // 여기는 null 이 되면 안되지..
     likes = List.from(likes)..add(userModel.uid!);
+  }
+
+  void reshareTweet(
+      TweetModel tweetModel, UserModel userModel, BuildContext context) async {
+    tweetModel = tweetModel.copyWith(retweetedBy: userModel.name,reshareCount: (((tweetModel.reshareCount) as int) + 1)); // 여전히 state 의 값을 업데이트 하고 있다.
+    final res = await _tweetAPI.updateReshareCount(tweetModel); // 여기는 서버에 관련된것..
+
+    res.fold((l) {
+      showSnackBar(context, l.message.toString()); // 아무것도 보여줄게 없다.
+    }, (r) async {
+      final tweetModel2 = tweetModel.copyWith(id: ID.unique(), reshareCount: 0, tweetAt: DateTime.now());
+      final res2 = await _tweetAPI.shareTweet(tweetModel2,);
+      res2.fold((l) => showSnackBar(context, l.message.toString()), (r) => showSnackBar(context, 'retweeted successfully'));
+    });
   }
 }

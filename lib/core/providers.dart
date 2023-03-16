@@ -23,7 +23,7 @@ final appWriteDatabasesProvider = Provider<Databases>((ref) {
   return Databases(ref.watch(appWriteClientProvider));
 });
 
-// state 프로바이더, 이거 잘못됐네.. 이렇게 하면 안되네..
+// state 프로바이더, 이거 잘못됐네.. 이렇게 하면 안되네.. StateNotifier 를 상속 받으면 사용할 수 있네..
 final sessionStateProvider = StateProvider<models.Session?>((ref) {
   models.Session? session;
   return session;

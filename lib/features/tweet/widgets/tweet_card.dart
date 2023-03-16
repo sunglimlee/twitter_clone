@@ -18,7 +18,7 @@ import '../../../constants/assets_constants.dart';
 
 // 이 부분은 화면 디자인 부분이다. 아주 중요한 부분이다.
 class TweetCard extends ConsumerWidget {
-  final TweetModel _tweetModel;
+  final TweetModel _tweetModel; // 외부의 state
 
   const TweetCard({
     required TweetModel tweetModel,
@@ -32,6 +32,7 @@ class TweetCard extends ConsumerWidget {
     return currentUserId == null
         ? Container()
         : ref.watch(userDetailsProvider(currentUserId)).when(
+            // 이것도 외부의 state
             data: (userModel) {
               return Column(
                 children: [
@@ -49,7 +50,26 @@ class TweetCard extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // retweeted
+                            if (_tweetModel.retweetedBy != null)
+                              Row(
+                                children: [
+                                  SvgPicture.asset(
+                                    AssetsConstants.retweetIcon,
+                                    color: Pallete.greyColor,
+                                    height: 20,
+                                  ),
+                                  const SizedBox(
+                                    width: 2,
+                                  ),
+                                  Text(
+                                    '${_tweetModel.retweetedBy} retweeted  · ${timeago.format(_tweetModel.tweetAt, locale: 'en_short')} ',
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Pallete.greyColor,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
                             Row(children: [
                               Container(
                                 margin: const EdgeInsets.only(right: 5),
@@ -79,78 +99,102 @@ class TweetCard extends ConsumerWidget {
                               ),
                             ],
                             Container(
-                              margin:
-                              const EdgeInsets.only(top: 10, right: 20),
+                              margin: const EdgeInsets.only(top: 10, right: 20),
                               child: Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   TweetIconButton(
                                     pathName: AssetsConstants.viewsIcon,
-                                    text: ((_tweetModel.commentIds?.length ??
-                                        0)
-                                        .toInt() +
-                                        (_tweetModel.reshareCount ?? 0) +
-                                        (_tweetModel.likes?.length ?? 0)
-                                            .toInt())
+                                    text: ((_tweetModel.commentIds?.length ?? 0)
+                                                .toInt() +
+                                            (_tweetModel.reshareCount ?? 0) +
+                                            (_tweetModel.likes?.length ?? 0)
+                                                .toInt())
                                         .toString(),
                                     onTap: null,
                                   ),
                                   TweetIconButton(
                                     pathName: AssetsConstants.commentIcon,
-                                    text:
-                                    ((_tweetModel.commentIds?.length ?? 0)
-                                        .toInt())
+                                    text: ((_tweetModel.commentIds?.length ?? 0)
+                                            .toInt())
                                         .toString(),
                                     onTap: null,
                                   ),
                                   TweetIconButton(
                                     pathName: AssetsConstants.retweetIcon,
                                     text: ((_tweetModel.reshareCount ?? 0)
-                                        .toInt())
+                                            .toInt())
                                         .toString(),
-                                    onTap: null,
+                                    onTap: () {
+                                      ref
+                                          .read(tweetStateNotifierProvider
+                                              .notifier)
+                                          .reshareTweet(
+                                              _tweetModel,
+                                              ref
+                                                  .read(userDetailsProvider(
+                                                      currentUserId))
+                                                  .value!,
+                                              context);
+                                      //print('돌아온 tweetModel 값은 ${res3}');
+                                    },
                                   ),
                                   LikeButton(
                                     size: 25,
                                     onTap: (isLiked) async {
-                                      print('isLiked 값 : ${isLiked.toString()}');
-                                      print('_tweetModel 의 before .likeTweet (build)[tweet_cart.dart] ${_tweetModel.toString()}');
+                                      // 서버 저장하는 시간동안 애니메이션이 활성화 되는 구조였어... ㅋ
+                                      print(
+                                          'isLiked 값 : ${isLiked.toString()}');
+                                      print(
+                                          '_tweetModel 의 before .likeTweet (build)[tweet_cart.dart] ${_tweetModel.toString()}');
                                       ref
-                                          .watch(tweetStateNotifierProvider
-                                          .notifier)
+                                          .read(tweetStateNotifierProvider
+                                              .notifier)
                                           .likeTweet(
-                                          _tweetModel, ref.watch(userDetailsProvider(currentUserId)).value!);
-                                      print('LikeButton 의 return 바로전 isLiked 값 : ${isLiked}');
-                                      return !isLiked;
+                                              _tweetModel,
+                                              ref
+                                                  .watch(userDetailsProvider(
+                                                      currentUserId))
+                                                  .value!);
+                                      print(
+                                          'LikeButton 의 return 바로전 isLiked 값 : ${isLiked}');
+                                      return !isLiked; // 이거 없어도 되지만 그냥 너무 빠르게 지나가지..
                                     },
-                                    isLiked: (){
-                                      print('⭐⭐⭐⭐⭐️_tweetModel.likes 의 값 ${_tweetModel.toString()}');
-                                      bool res = _tweetModel.likes == null ? false : _tweetModel.likes!.contains(currentUserId) ? true : false;
+                                    isLiked: () {
+                                      print(
+                                          '⭐⭐⭐⭐⭐️_tweetModel.likes 의 값 ${_tweetModel.toString()}');
+                                      // 결국 state 의 상태로 결정되는거고..
+                                      bool res = _tweetModel.likes == null
+                                          ? false
+                                          : _tweetModel.likes!
+                                                  .contains(currentUserId)
+                                              ? true
+                                              : false;
                                       print('res 의 값 : ${res}');
                                       return res;
                                     }(),
                                     likeBuilder: (isLiked) {
-                                      print('_tweetModel 의 likebuild 안에서 (build)[tweet_cart.dart] ${_tweetModel.toString()}');
+                                      print(
+                                          '_tweetModel 의 likebuild 안에서 (build)[tweet_cart.dart] ${_tweetModel.toString()}');
 
-                                      print('likebuilder 의 isLiked 값 : ${isLiked}');
+                                      print(
+                                          'likebuilder 의 isLiked 값 : ${isLiked}');
                                       return isLiked
                                           ? SvgPicture.asset(
-                                        AssetsConstants.likeFilledIcon,
-                                        color: Pallete.redColor,
-                                      )
+                                              AssetsConstants.likeFilledIcon,
+                                              color: Pallete.redColor,
+                                            )
                                           : SvgPicture.asset(
-                                        AssetsConstants
-                                            .likeOutlinedIcon,
-                                        color: Pallete.whiteColor,
-                                      );
+                                              AssetsConstants.likeOutlinedIcon,
+                                              color: Pallete.whiteColor,
+                                            );
                                     },
                                     likeCount: _tweetModel.likes?.length ?? 0,
                                     // 누가 좋아했는지 uid 를 넣은거네..
                                     countBuilder: (likeCount, isLiked, text) {
                                       return Padding(
-                                        padding:
-                                        const EdgeInsets.only(left: 2),
+                                        padding: const EdgeInsets.only(left: 2),
                                         child: Text(
                                           text,
                                           style: TextStyle(
@@ -163,66 +207,6 @@ class TweetCard extends ConsumerWidget {
                                       );
                                     },
                                   ),
-
-/*
-                                  LikeButton(
-                                    size: 25,
-                                    onTap: (isLiked) async {
-                                      ref
-                                          .read(tweetStateNotifierProvider
-                                          .notifier)
-                                          .likeTweet(
-                                        _tweetModel,
-                                          ref.watch(userDetailsProvider(currentUserId)).value!
-                                      );
-                                      return !isLiked;
-                                    },
-                                    isLiked: _tweetModel.likes == null ? false : _tweetModel.likes!.contains(currentUserId) ? true : false,
-*/
-/*
-                                    isLiked: _tweetModel.likes.contains(currentUserId),
-*//*
-
-                                    likeBuilder: (isLiked) {
-                                      return isLiked
-                                          ? SvgPicture.asset(
-                                        AssetsConstants
-                                            .likeFilledIcon,
-                                        color: Pallete.redColor,
-                                      )
-                                          : SvgPicture.asset(
-                                        AssetsConstants
-                                            .likeOutlinedIcon,
-                                        color: Pallete.greyColor,
-                                      );
-                                    },
-                                    likeCount: _tweetModel.likes?.length??0,
-                                    countBuilder:
-                                        (likeCount, isLiked, text) {
-                                      return Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 2.0),
-                                        child: Text(
-                                          text,
-                                          style: TextStyle(
-                                            color: isLiked
-                                                ? Pallete.redColor
-                                                : Pallete.whiteColor,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-*/
-/*
-                                TweetIconButton(
-                                  pathName: AssetsConstants.likeOutlinedIcon,
-                                  text: ((_tweetModel.likes?.length??0).toInt()
-                                  ).toString(),
-                                  onTap: null,
-                                ),
-*/
                                   const IconButton(
                                       onPressed: null,
                                       icon: Icon(
@@ -233,7 +217,6 @@ class TweetCard extends ConsumerWidget {
                                 ],
                               ),
                             ),
-
                           ],
                         ),
                       ),

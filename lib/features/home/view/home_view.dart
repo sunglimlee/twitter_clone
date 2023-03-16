@@ -34,6 +34,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   @override
   Widget build(BuildContext context) {
+    print('여긴 홈');
     //print('Riverpod Session 값 (build)[home_view.dart] ${ref.watch(sessionStateProvider)!.userId}');
     // final session = ref.watch(sessionStateProvider);
     // print('SessionSP 값: ${session?.userId??"세션값이 없군요."}');

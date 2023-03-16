@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:twitter_clone/constants/assets_constants.dart';
+import 'package:twitter_clone/features/tweet/test/tweet_documents_list.dart';
 import 'package:twitter_clone/features/tweet/widgets/tweet_list.dart';
 import 'package:twitter_clone/theme/pallete.dart';
 
@@ -17,11 +18,11 @@ class UIConstants {
       centerTitle: true,
     );
   }
-  // 나는 ui_constants 에 않넣고 여기에다가 넣었다.
+  // 나는 ui_constants 에 않넣고 여기에다가 넣었다. static function
   static List<Widget> childrenForIndexedStack() {
     final children = [
       TweetList(),
-      Text('Search Screen'),
+      TestTweetDocumentsList(),
       Text('Notificatin Screen'),
     ];
     return children;

@@ -18,6 +18,7 @@ class TweetList extends ConsumerWidget {
     // 한번 만들어진 상태로 그대로 유지되고 있다.
     return ref.watch(getTweetsProvider).when(
       data: (tweets) { // 없는데...
+        //final localTweets = [...tweets];
         return ref.watch(getLatestTweetProvider).when( // 얘네가 바꾸기를 원하네..
           data: (data) {
             if (data.events.contains(
@@ -29,6 +30,7 @@ class TweetList extends ConsumerWidget {
               'databases.*.collections.${AppWriteConstants.tweetsCollection}.documents.*.update',
             )) {
               // get id of original tweet
+              // 여러가지 이벤트가 한꺼번에 올텐데 여기서는 그냥 events[0] 로 만드네..
               final startingPoint =
               data.events[0].lastIndexOf('documents.');
               final endPoint = data.events[0].lastIndexOf('.update');
@@ -45,7 +47,7 @@ class TweetList extends ConsumerWidget {
               tweet = TweetModel.fromJson(data.payload);
               tweets.insert(tweetIndex, tweet);
             }
-
+            data.events.clear();
             return ListView.builder(
               itemCount: tweets.length,
               itemBuilder: (BuildContext context, int index) {
@@ -57,7 +59,7 @@ class TweetList extends ConsumerWidget {
           error: (error, stackTrace) => ErrorText(
             errorMessage: error.toString(),
           ),
-          loading: () {
+          loading: () { // 맨처음에 stream 이 없으니 데이터 자체가 없는거지.. 그래서 여전히 List 를 리턴하는거고..
             return ListView.builder(
               itemCount: tweets.length,
               itemBuilder: (BuildContext context, int index) {
