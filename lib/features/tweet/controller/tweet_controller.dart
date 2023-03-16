@@ -80,6 +80,7 @@ class TweetControllerNotifier extends StateNotifier<bool> {
     required String text,
     required BuildContext context,
   }) async {
+    //_ref.invalidate(tweetStateNotifierProvider);
     state = true;
     final hashTags = _getHashTagsFromText(text);
     final link = _getLinkFromText(text);
@@ -106,7 +107,9 @@ class TweetControllerNotifier extends StateNotifier<bool> {
     // 재밌는 사실은 fpdart 에서 사용되는 fold 함수가 정작 양쪽에서 리턴되는 갑은 C 로 같다는 사실
     state = false;
     print('res 값 ${res}');
-    res.fold((l) => showSnackBar(context, l.message), (r) => null);
+    res.fold((l) => showSnackBar(context, l.message), (r) {
+      //_ref.refresh(tweetStateNotifierProvider);
+    });
   }
 
   void _shareImageTweet({
@@ -144,7 +147,9 @@ class TweetControllerNotifier extends StateNotifier<bool> {
     // 재밌는 사실은 fpdart 에서 사용되는 fold 함수가 정작 양쪽에서 리턴되는 갑은 C 로 같다는 사실
     state = false;
     print('res 값 ${res}');
-    res.fold((l) => showSnackBar(context, l.message), (r) => null);
+    res.fold((l) => showSnackBar(context, l.message), (r) {
+      return null;
+    });
   }
 
   String _getLinkFromText(String text) {
@@ -172,13 +177,15 @@ class TweetControllerNotifier extends StateNotifier<bool> {
   }
 
   void likeTweet(TweetModel tweetModel, UserModel userModel) async {
-    print('userModel.uid! ${userModel.uid??'userModel.uid 의 값이 존재하지 않습니다.'}: (likeTweet)[tweet_controller.dart]');
+    print(
+        'userModel.uid! ${userModel.uid ?? 'userModel.uid 의 값이 존재하지 않습니다.'}: (likeTweet)[tweet_controller.dart]');
     print('tweetModel (likeTweet)[tweet_controller] ${tweetModel.toString()}');
     List<String> likes = [];
-    likes = tweetModel.likes??[];
+    likes = tweetModel.likes ?? [];
     print('likes 의 형 (likeTweet)[tweet_controller] : ${likes.toString()}');
     if (tweetModel.likes != null) {
-      print('tweetModel 전체 (likeTweet)[tweet_controller] : ${tweetModel.likes.toString()}');
+      print(
+          'tweetModel 전체 (likeTweet)[tweet_controller] : ${tweetModel.likes.toString()}');
       if (tweetModel.likes!.contains(userModel.uid)) {
         //likes.remove(userModel.uid);
         likes = List.from(likes)..remove(userModel.uid!);
@@ -188,13 +195,13 @@ class TweetControllerNotifier extends StateNotifier<bool> {
         likes = List.from(likes)..add(userModel.uid!);
         print('likes after add : ${likes.toString()}');
         // likes 가 immutable 이라고 add 가 안된다.
-
       }
     }
     // 이제 tweetModel 을 업데이트 해야하는데 꼭 기억할게 이건 immutable 라는 사실이다.
     // 그래서 copyWith 를 반드시 사용하도록 하자.
     tweetModel = tweetModel.copyWith(likes: likes);
-    print('tweetModel 전체 (likeTweet)[tweet_controller] : ${tweetModel.likes.toString()}');
+    print(
+        'tweetModel 전체 (likeTweet)[tweet_controller] : ${tweetModel.likes.toString()}');
     final res = await _tweetAPI.likeTweet(tweetModel);
     // 여기부터 fold 함수 사용할 것임..
     res.fold((l) {

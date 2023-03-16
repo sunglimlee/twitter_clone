@@ -30,7 +30,7 @@ class TweetCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUserId = ref.watch(currentUserIdProvider).value;
     return currentUserId == null
-        ? const Loader()
+        ? Container()
         : ref.watch(userDetailsProvider(currentUserId)).when(
             data: (userModel) {
               return Column(
@@ -250,7 +250,8 @@ class TweetCard extends ConsumerWidget {
                   errorMessage: error.toString(),
                 ),
             loading: () {
-              return const Loader();
+              return Container();
+              //return const CircularProgressIndicator(color: Colors.blueAccent,);
             });
   }
 }
