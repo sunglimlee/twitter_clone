@@ -27,7 +27,7 @@ final getTweetsProvider = FutureProvider.autoDispose((ref) {
       tweetStateNotifierProvider.notifier); // 이말 정확히 이해되지? 프로바이더에서 watch 를 받았다.
   return tweetStateNotifierWatch.getTweetDocuments();
 });
-
+/* 뭔가 문제인지 모르겟다.*/
 final getLatestTweetProvider =
     StreamProvider.autoDispose<RealtimeMessage>((ref) {
   // 여기서는 특이하게도 api 에서 바로 받네.. 언제는 바로 받는거 하지 말라고 하더만...
