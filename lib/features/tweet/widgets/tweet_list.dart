@@ -12,13 +12,18 @@ class TweetList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    print("전체 고침");
+    // 이게 되는 이유를 이제 알았다. 여기밖에 안쓰이고 여기에서 나가지 않았고 그래서 계속 상태가 유지가 되고 있다.
+    // 그래서 다시 build 를 할 필요가 없다. 뭘? tweets 값을
+    // 한번 만들어진 상태로 그대로 유지되고 있다.
     return ref.watch(getTweetsProvider).when(
-      data: (tweets) {
-        return ref.watch(getLatestTweetProvider).when(
+      data: (tweets) { // 없는데...
+        return ref.watch(getLatestTweetProvider).when( // 얘네가 바꾸기를 원하네..
           data: (data) {
             if (data.events.contains(
               'databases.*.collections.${AppWriteConstants.tweetsCollection}.documents.*.create',
             )) {
+              // 여기 데이터 값이 나온거다. 메모리 어딘가에 저장되어 있고 이건 바뀌질 않았지..
               tweets.insert(0, TweetModel.fromJson(data.payload));
             } else if (data.events.contains(
               'databases.*.collections.${AppWriteConstants.tweetsCollection}.documents.*.update',

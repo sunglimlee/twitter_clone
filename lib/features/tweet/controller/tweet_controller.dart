@@ -27,6 +27,7 @@ final getTweetsProvider = FutureProvider.autoDispose((ref) {
       tweetStateNotifierProvider.notifier); // 이말 정확히 이해되지? 프로바이더에서 watch 를 받았다.
   return tweetStateNotifierWatch.getTweetDocuments();
 });
+
 /* 뭔가 문제인지 모르겟다.*/
 final getLatestTweetProvider =
     StreamProvider.autoDispose<RealtimeMessage>((ref) {
@@ -109,6 +110,7 @@ class TweetControllerNotifier extends StateNotifier<bool> {
     print('res 값 ${res}');
     res.fold((l) => showSnackBar(context, l.message), (r) {
       //_ref.refresh(tweetStateNotifierProvider);
+
     });
   }
 
