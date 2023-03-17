@@ -39,6 +39,35 @@ final getLatestTweetProvider =
   return tweetApiWatch.getLatestTweet();
 });
 
+/// 이 provider 는 만들기만 하고 안쓸거다. 나는 그냥 TweetcControllerNotifier 에서 바로 쓸래..
+final getRepliedToTweetProvider =
+    FutureProvider.autoDispose.family((ref, TweetModel tweetModel) {
+  final tweetControllerWatch = ref.watch(tweetStateNotifierProvider.notifier);
+  return tweetControllerWatch.getRepliedToTweet(tweetModel: tweetModel);
+});
+
+/// 이 provider 는 documentId 를 이용하여 userModel 을 받는 Provider 이다.
+final getTweetModelByIdProvider =
+    FutureProvider.autoDispose.family((ref, String documentId) {
+  final tweetControllerWatch = ref.watch(tweetStateNotifierProvider.notifier);
+  return tweetControllerWatch.getTweetModelByDocumentId(documentId);
+});
+
+/// 이 provider 는 documentId 를 이용하여 userModel 을 받는 Provider 이다.
+final getUserModelByTweetModelProvider =
+    FutureProvider.autoDispose.family((ref, String documentId) async {
+  final getTweetModelByIdWatch =
+      ref.watch(getTweetModelByIdProvider(documentId));
+  String id = '';
+  if (getTweetModelByIdWatch.hasValue) {
+    id = getTweetModelByIdWatch.value!.uid;
+    final getUserDetailsWatch = ref.watch(userDetailsProvider(id));
+    return getUserDetailsWatch.value!.name;
+  } else {
+    return id;
+  }
+});
+
 class TweetControllerNotifier extends StateNotifier<bool> {
   final TweetAPI _tweetAPI;
   final StorageAPI _storageAPI;
@@ -62,26 +91,33 @@ class TweetControllerNotifier extends StateNotifier<bool> {
     }).toList();
   }
 
+  Future<TweetModel> getTweetModelByDocumentId(String documentId) async {
+    final result = await _tweetAPI.getTweetModelByDocumentId(documentId);
+    return TweetModel.fromJson(result.data);
+  }
+
   void shareTweet({
     required List<File> images,
     required String text,
     required BuildContext context,
+    required String? repliedTo, // tweet ID 가 들어가야 한다.
   }) {
     if (text.isEmpty) {
       showSnackBar(context, 'Please Enter Text');
     }
     if (images.isNotEmpty) {
-      _shareImageTweet(images: images, text: text, context: context);
+      _shareImageTweet(
+          images: images, text: text, context: context, repliedTo: repliedTo);
     } else {
-      _shareTextTweet(text: text, context: context);
+      _shareTextTweet(text: text, context: context, repliedTo: repliedTo);
     }
   }
 
   // 여기서 await 가 두번 들어가고 있다.
-  void _shareTextTweet({
-    required String text,
-    required BuildContext context,
-  }) async {
+  void _shareTextTweet(
+      {required String text,
+      required BuildContext context,
+      required String? repliedTo}) async {
     //_ref.invalidate(tweetStateNotifierProvider);
     state = true;
     final hashTags = _getHashTagsFromText(text);
@@ -101,6 +137,7 @@ class TweetControllerNotifier extends StateNotifier<bool> {
         link: link,
         hashTags: hashTags,
         imageLinks: const [],
+        repliedTo: repliedTo,
         reshareCount: 0);
     // tweet 저장하는 부분
     final res = await _tweetAPI.shareTweet(tweetModel);
@@ -118,6 +155,7 @@ class TweetControllerNotifier extends StateNotifier<bool> {
     required List<File> images,
     required String text,
     required BuildContext context,
+    required String? repliedTo,
   }) async {
     // 여기 image 는 조금 다르게 저장이 될 거다. 절차를 잘보고 결정하도록 하자.
     // Storage 에 저장이 될거고..
@@ -141,6 +179,7 @@ class TweetControllerNotifier extends StateNotifier<bool> {
         link: link,
         hashTags: hashTags,
         imageLinks: imageLinks,
+        repliedTo: repliedTo,
         reshareCount: 0);
     // tweet 저장하는 부분
     final res = await _tweetAPI.shareTweet(tweetModel);
@@ -222,15 +261,39 @@ class TweetControllerNotifier extends StateNotifier<bool> {
 
   void reshareTweet(
       TweetModel tweetModel, UserModel userModel, BuildContext context) async {
-    tweetModel = tweetModel.copyWith(retweetedBy: userModel.name,reshareCount: (((tweetModel.reshareCount) as int) + 1)); // 여전히 state 의 값을 업데이트 하고 있다.
-    final res = await _tweetAPI.updateReshareCount(tweetModel); // 여기는 서버에 관련된것..
+    tweetModel = tweetModel.copyWith(
+        retweetedBy: userModel.name,
+        reshareCount: (((tweetModel.reshareCount) as int) +
+            1)); // 여전히 state 의 값을 업데이트 하고 있다.
+    final res =
+        await _tweetAPI.updateReshareCount(tweetModel); // 여기는 서버에 관련된것..
 
     res.fold((l) {
       showSnackBar(context, l.message.toString()); // 아무것도 보여줄게 없다.
     }, (r) async {
-      final tweetModel2 = tweetModel.copyWith(id: ID.unique(), reshareCount: 0, tweetAt: DateTime.now());
-      final res2 = await _tweetAPI.shareTweet(tweetModel2,);
-      res2.fold((l) => showSnackBar(context, l.message.toString()), (r) => showSnackBar(context, 'retweeted successfully'));
+      final tweetModel2 = tweetModel.copyWith(
+          id: ID.unique(), reshareCount: 0, tweetAt: DateTime.now());
+      final res2 = await _tweetAPI.shareTweet(
+        tweetModel2,
+      );
+      res2.fold((l) => showSnackBar(context, l.message.toString()),
+          (r) => showSnackBar(context, 'retweeted successfully'));
+    });
+  }
+
+  Future<List<TweetModel>?> getRepliedToTweet({
+    required TweetModel tweetModel,
+  }) async {
+    final res = await _tweetAPI.getRepliedToTweet(tweetModel);
+    print('res 값 (getRepliedToTweet)[tweet_controller] : ${res.toString()}');
+    return res.fold((l) {
+      print(
+          'getRepliedToTweet 에서 null 이 리턴되었습니다. 즉 Failure 객체가 리턴되었습니다. (getRepliedToTweet)[tweet_controller] ${l.message.toString()}');
+      return null;
+    }, (r) {
+      return r.map((e) {
+        return TweetModel.fromJson(e.data);
+      }).toList();
     });
   }
 }

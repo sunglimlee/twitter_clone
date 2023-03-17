@@ -44,7 +44,7 @@ class TweetList extends ConsumerWidget {
               final tweetIndex = tweets.indexOf(tweet);
               tweets.removeWhere((element) => element.id == tweetId);
 
-              tweet = TweetModel.fromJson(data.payload);
+              tweet = TweetModel.fromJson(data.payload); // 가장 최근의 tweet 의 값을  받아서
               tweets.insert(tweetIndex, tweet);
             }
             data.events.clear();

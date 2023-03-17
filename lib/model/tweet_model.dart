@@ -21,6 +21,7 @@ class TweetModel with _$TweetModel {
     String? id,
     String? retweetedBy,
     int? reshareCount,
+    String? repliedTo,
   }) = _TweetModel;
 
   factory TweetModel.fromJson(Map<String, dynamic> json) =>

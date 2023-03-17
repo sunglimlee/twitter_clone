@@ -17,8 +17,10 @@ _$_TweetModel _$$_TweetModelFromJson(Map<String, dynamic> json) =>
           ?.map((e) => e as String)
           .toList(),
       uid: json['uid'] as String,
-      tweetType: (($enumDecode(
-          _$TweetTypeEnumMap, (json['tweetType'] as String)))),  // 이부분 .toTweetTypeEnum() 없이 그냥 text 를 넣으면 되는거 아냐?? 밑에 _$TweetTypeEnumMap 함수를 잘봐라.. 그냥 text
+          tweetType: (($enumDecode(
+              _$TweetTypeEnumMap, (json['tweetType'] as String)))),  // 이부분 .toTweetTypeEnum() 없이 그냥 text 를 넣으면 되는거 아냐?? 밑에 _$TweetTypeEnumMap 함수를 잘봐라.
+
+
       tweetAt: DateTime.parse(json['tweetedAt'] as String),
       likes:
           (json['likes'] as List<dynamic>?)?.map((e) => e as String).toList(),
@@ -28,6 +30,7 @@ _$_TweetModel _$$_TweetModelFromJson(Map<String, dynamic> json) =>
       id: json['\$id'] as String?,
       retweetedBy: json['retweetedBy'] as String?,
       reshareCount: json['reshareCount'] as int?,
+      repliedTo: json['repliedTo'] as String?,
     );
 
 Map<String, dynamic> _$$_TweetModelToJson(_$_TweetModel instance) =>
@@ -44,6 +47,7 @@ Map<String, dynamic> _$$_TweetModelToJson(_$_TweetModel instance) =>
       //'id': instance.id,
       'retweetedBy': instance.retweetedBy,
       'reshareCount': instance.reshareCount,
+      'repliedTo': instance.repliedTo,
     };
 
 const _$TweetTypeEnumMap = {

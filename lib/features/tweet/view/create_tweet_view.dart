@@ -34,7 +34,7 @@ class _CreateTweetScreenState extends ConsumerState<CreateTweetScreen> {
 
   void shareTweet() {
     ref.read(tweetStateNotifierProvider.notifier).shareTweet(
-        images: images, text: tweetTextController.text, context: context);
+        images: images, text: tweetTextController.text, context: context, repliedTo: null);
     // 여기는 말 그래도 화면상이니깐 여기서 Navigation 하는게 맞지.
     Navigator.pop(context);
   }
@@ -149,7 +149,7 @@ class _CreateTweetScreenState extends ConsumerState<CreateTweetScreen> {
               ),
             ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.only(bottom: 20),
         decoration: const BoxDecoration(
           border: Border(
             top: BorderSide(
