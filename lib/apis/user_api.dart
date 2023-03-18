@@ -21,6 +21,8 @@ abstract class IUserAPI {
   FutureEitherVoid saveUserData(
       {required UserModel userModel}); // 저장하고 문제가 없으면 void 를 리턴하기 때문이다.
   Future<model.Document> getUserData(String uid);
+
+  Future<List<model.Document>> searchUserByName(String name);
 }
 
 // 이말은 interface 라는 뜻이네.. 상속과 관련없이 마음대로 만들 수 있는거 알지?
@@ -31,7 +33,7 @@ class UserAPI implements IUserAPI {
 
   @override
   Future<model.Document> getUserData(String? uid) async {
-    print('in getUserData in user_api.dart : ${uid}');
+    print('in getUserData in user_api.dart : $uid');
     try {
       if (uid != null) {
         final document = await _db.getDocument(
@@ -43,9 +45,9 @@ class UserAPI implements IUserAPI {
       } else {
         throw AppwriteException("오류가 발생");
       }
-    } on AppwriteException catch (e, st) {
+    } on AppwriteException catch (e) {
       throw AppwriteException(e.message, e.code); // 여기서 오류를 던졌는데
-    } catch (e, st) {
+    } catch (e) {
       print('오류가 발생했습니다.');
       rethrow;
     }
@@ -70,12 +72,33 @@ class UserAPI implements IUserAPI {
       return right(null);
     } on AppwriteException catch (e, st) {
       return left(Failure(
-          message: e.message.toString() ?? 'Some unexpected error occurred',
+          message: e.message.toString(),
           stackTrace: st));
     } catch (e, st) {
       return left(Failure(
-          message: e.toString() ?? 'Some unexpected error occurred',
+          message: e.toString(),
           stackTrace: st));
+    }
+  }
+
+  @override
+  Future<List<model.Document>> searchUserByName(String name) async {
+    try {
+        final documents = await _db.listDocuments(
+            databaseId: AppWriteConstants.databaseId,
+            collectionId: AppWriteConstants.usersCollection,
+          queries: [
+            Query.search('name', name),
+          ],
+            );
+        //print('document in getUserData in User_api.dart : ${documents.data.toString()}');
+        return documents.documents;
+    } on AppwriteException catch (e) {
+        print('List<model.Document 생성 도중 Error 발생 (searchUserByName)[user_api] ${e.message.toString()}');
+        rethrow;
+    } catch (e) {
+      print('List<model.Document 생성 도중 Error 발생 (searchUserByName)[user_api] ${e.toString()}');
+      rethrow;
     }
   }
 }

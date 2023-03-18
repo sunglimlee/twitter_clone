@@ -39,7 +39,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
     // final session = ref.watch(sessionStateProvider);
     // print('SessionSP 값: ${session?.userId??"세션값이 없군요."}');
     return Scaffold(
-      appBar: appBar, // 이렇게 build 함수 밖에 변수를 두고 사용하면 rebuild 를 줄여준다.
+      appBar: _page == 0 ? appBar : null, // 이렇게 build 함수 밖에 변수를 두고 사용하면 rebuild 를 줄여준다.
       body: Center(
         child: IndexedStack(
           index: _page,
