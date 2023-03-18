@@ -92,7 +92,7 @@ class TweetControllerNotifier extends StateNotifier<bool> {
   }
 
   Future<TweetModel> getTweetModelByDocumentId(String documentId) async {
-    final result = await _tweetAPI.getTweetModelByDocumentId(documentId);
+    final result = await _tweetAPI.getDocumentByDocumentId(documentId);
     return TweetModel.fromJson(result.data);
   }
 

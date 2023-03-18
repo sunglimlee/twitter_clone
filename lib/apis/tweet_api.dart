@@ -28,7 +28,9 @@ abstract class ITweetAPI {
 
   FutureEither<List<model.Document>> getRepliedToTweet(TweetModel tweetModel);
 
-  Future<model.Document> getTweetModelByDocumentId(String documentId);
+  Future<model.Document> getDocumentByDocumentId(String documentId);
+
+  Future<List<model.Document>> getDocumentsByUser(String uid);
 }
 
 class TweetAPI implements ITweetAPI {
@@ -78,12 +80,9 @@ class TweetAPI implements ITweetAPI {
 
   @override
   Stream<RealtimeMessage> getLatestTweet() {
-    return _realtime
-        .subscribe([
-      'databases.${AppWriteConstants.databaseId}.collections.${AppWriteConstants
-          .tweetsCollection}.documents'
-    ])
-        .stream;
+    return _realtime.subscribe([
+      'databases.${AppWriteConstants.databaseId}.collections.${AppWriteConstants.tweetsCollection}.documents'
+    ]).stream;
   }
 
   @override
@@ -133,10 +132,11 @@ class TweetAPI implements ITweetAPI {
     try {
       final document = await _db.listDocuments(
           databaseId: AppWriteConstants.databaseId,
-          collectionId: AppWriteConstants.tweetsCollection, queries: [
-        Query.equal('repliedTo', tweetModel.id.toString()),
-        // 이걸 실수했네. id 와 매치가 되어야지..
-      ]);
+          collectionId: AppWriteConstants.tweetsCollection,
+          queries: [
+            Query.equal('repliedTo', tweetModel.id.toString()),
+            // 이걸 실수했네. id 와 매치가 되어야지..
+          ]);
       return right(document.documents);
     } on AppwriteException catch (e, st) {
       return left(Failure(message: e.message.toString(), stackTrace: st));
@@ -146,10 +146,23 @@ class TweetAPI implements ITweetAPI {
   }
 
   @override
-  Future<model.Document> getTweetModelByDocumentId(String documentId) async {
-      final document = await _db.getDocument(databaseId: AppWriteConstants.databaseId, collectionId: AppWriteConstants.tweetsCollection, documentId: documentId);
-      return document;
+  Future<model.Document> getDocumentByDocumentId(String documentId) async {
+    final document = await _db.getDocument(
+        databaseId: AppWriteConstants.databaseId,
+        collectionId: AppWriteConstants.tweetsCollection,
+        documentId: documentId);
+    return document;
   }
 
-
+  @override
+  Future<List<model.Document>> getDocumentsByUser(String uid) async {
+    final documents = await _db.listDocuments(
+        databaseId: AppWriteConstants.databaseId,
+        collectionId: AppWriteConstants.tweetsCollection,
+        queries: [
+          Query.equal('uid', uid),
+          // 이걸 실수했네. id 와 매치가 되어야지..
+        ]);
+    return documents.documents;
+  }
 }

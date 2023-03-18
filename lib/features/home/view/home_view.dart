@@ -13,6 +13,7 @@ class HomeView extends ConsumerStatefulWidget {
   static route() => MaterialPageRoute(
     builder: (context) => const HomeView(),
   );
+
   @override
   ConsumerState<HomeView> createState() => _HomeViewState();
 }
