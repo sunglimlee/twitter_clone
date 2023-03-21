@@ -13,6 +13,7 @@ import 'package:twitter_clone/features/tweet/view/twitter_reply_screen.dart';
 import 'package:twitter_clone/features/tweet/widgets/carousel_image.dart';
 import 'package:twitter_clone/features/tweet/widgets/hashtag_text.dart';
 import 'package:twitter_clone/features/tweet/widgets/tweet_icon_button.dart';
+import 'package:twitter_clone/features/user_profile/view/user_profile_view.dart';
 import 'package:twitter_clone/model/tweet_model.dart';
 import 'package:twitter_clone/theme/pallete.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -54,10 +55,16 @@ class TweetCard extends ConsumerWidget {
                       children: [
                         Container(
                           margin: const EdgeInsets.all(10),
-                          child: CircleAvatar(
-                            backgroundImage:
-                                NetworkImage(userModel.profilePic!),
-                            radius: 35,
+                          child: GestureDetector(
+                            onTap: (){
+                              print('tweet card 에서 실행되었습니다.');
+                              Navigator.push(context, UserProfileView.route(userModel));
+                            },
+                            child: CircleAvatar(
+                              backgroundImage:
+                                  NetworkImage(userModel.profilePic!),
+                              radius: 35,
+                            ),
                           ),
                         ),
                         Expanded(
@@ -199,8 +206,7 @@ class TweetCard extends ConsumerWidget {
                                         return !isLiked; // 이거 없어도 되지만 그냥 너무 빠르게 지나가지..
                                       },
                                       isLiked: () {
-                                        print(
-                                            '_tweetModel.likes 의 값 ${_tweetModel.toString()}');
+                                        //print('_tweetModel.likes 의 값 ${_tweetModel.toString()}');
                                         // 결국 state 의 상태로 결정되는거고..
                                         bool res = _tweetModel.likes == null
                                             ? false
@@ -208,15 +214,13 @@ class TweetCard extends ConsumerWidget {
                                                     .contains(currentUserId)
                                                 ? true
                                                 : false;
-                                        print('res 의 값 : ${res}');
+                                        //print('res 의 값 : ${res}');
                                         return res;
                                       }(),
                                       likeBuilder: (isLiked) {
-                                        print(
-                                            '_tweetModel 의 likebuild 안에서 (build)[tweet_cart.dart] ${_tweetModel.toString()}');
+                                        //print('_tweetModel 의 likebuild 안에서 (build)[tweet_cart.dart] ${_tweetModel.toString()}');
 
-                                        print(
-                                            'likebuilder 의 isLiked 값 : ${isLiked}');
+                                        //print('likebuilder 의 isLiked 값 : ${isLiked}');
                                         return isLiked
                                             ? SvgPicture.asset(
                                                 AssetsConstants.likeFilledIcon,

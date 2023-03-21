@@ -47,7 +47,7 @@ class TweetList extends ConsumerWidget {
               tweet = TweetModel.fromJson(data.payload); // 가장 최근의 tweet 의 값을  받아서
               tweets.insert(tweetIndex, tweet);
             }
-            data.events.clear();
+            //data.events.clear();
             return ListView.builder(
               itemCount: tweets.length,
               itemBuilder: (BuildContext context, int index) {

@@ -14,6 +14,7 @@ class SearchTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ListTile(
       onTap: (){
+        print('search_tile 에서 실행되었습니다.');
         Navigator.push(context, UserProfileView.route(_userModel),);
       },
       leading: CircleAvatar(

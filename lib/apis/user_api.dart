@@ -11,7 +11,8 @@ import 'package:twitter_clone/model/user_model.dart';
 final userAPIProvider = Provider<UserAPI>((ref) {
   // family 나 다른 provider 로 들어올 수 있고
   final db = ref.watch(appWriteDatabasesProvider);
-  return UserAPI(db: db);
+  final realtime = ref.watch(appWriteRealtimeProvider);
+  return UserAPI(db: db, realtime: realtime);
 });
 
 abstract class IUserAPI {
@@ -23,13 +24,18 @@ abstract class IUserAPI {
   Future<model.Document> getUserData(String uid);
 
   Future<List<model.Document>> searchUserByName(String name);
+
+  FutureEitherVoid updateUserData(UserModel userModel);
+
+  Stream<RealtimeMessage> getLatestUserProfileData();
 }
 
 // 이말은 interface 라는 뜻이네.. 상속과 관련없이 마음대로 만들 수 있는거 알지?
 class UserAPI implements IUserAPI {
   final Databases _db;
+  final Realtime _realtime;
 
-  UserAPI({required Databases db}) : _db = db;
+  UserAPI({required Databases db, required Realtime realtime}) : _db = db, _realtime = realtime;
 
   @override
   Future<model.Document> getUserData(String? uid) async {
@@ -39,8 +45,10 @@ class UserAPI implements IUserAPI {
         final document = await _db.getDocument(
             databaseId: AppWriteConstants.databaseId,
             collectionId: AppWriteConstants.usersCollection,
-            documentId: uid); // 여기에 uid 를 넣는다는건 알겠는데 앞에서 ID.unique() 를 둘 다 해주었는데 매치가 되나????
-        print('document in getUserData in User_api.dart : ${document.data.toString()}');
+            documentId:
+                uid); // 여기에 uid 를 넣는다는건 알겠는데 앞에서 ID.unique() 를 둘 다 해주었는데 매치가 되나????
+        print(
+            'document in getUserData in User_api.dart : ${document.data.toString()}');
         return document;
       } else {
         throw AppwriteException("오류가 발생");
@@ -71,34 +79,56 @@ class UserAPI implements IUserAPI {
       print('저장하신 userModel 의 document ID 는 ${document.$id} 입니다.');
       return right(null);
     } on AppwriteException catch (e, st) {
-      return left(Failure(
-          message: e.message.toString(),
-          stackTrace: st));
+      return left(Failure(message: e.message.toString(), stackTrace: st));
     } catch (e, st) {
-      return left(Failure(
-          message: e.toString(),
-          stackTrace: st));
+      return left(Failure(message: e.toString(), stackTrace: st));
     }
   }
 
   @override
   Future<List<model.Document>> searchUserByName(String name) async {
     try {
-        final documents = await _db.listDocuments(
-            databaseId: AppWriteConstants.databaseId,
-            collectionId: AppWriteConstants.usersCollection,
-          queries: [
-            Query.search('name', name),
-          ],
-            );
-        //print('document in getUserData in User_api.dart : ${documents.data.toString()}');
-        return documents.documents;
+      final documents = await _db.listDocuments(
+        databaseId: AppWriteConstants.databaseId,
+        collectionId: AppWriteConstants.usersCollection,
+        queries: [
+          Query.search('name', name),
+        ],
+      );
+      //print('document in getUserData in User_api.dart : ${documents.data.toString()}');
+      return documents.documents;
     } on AppwriteException catch (e) {
-        print('List<model.Document 생성 도중 Error 발생 (searchUserByName)[user_api] ${e.message.toString()}');
-        rethrow;
+      print(
+          'List<model.Document 생성 도중 Error 발생 (searchUserByName)[user_api] ${e.message.toString()}');
+      rethrow;
     } catch (e) {
-      print('List<model.Document 생성 도중 Error 발생 (searchUserByName)[user_api] ${e.toString()}');
+      print(
+          'List<model.Document 생성 도중 Error 발생 (searchUserByName)[user_api] ${e.toString()}');
       rethrow;
     }
+  }
+
+  @override
+  FutureEither<model.Document> updateUserData(UserModel userModel) async {
+    try {
+      final document = await _db.updateDocument(
+          databaseId: AppWriteConstants.databaseId,
+          collectionId: AppWriteConstants.usersCollection,
+          documentId: userModel.uid!,
+      data: userModel.toJson());
+      return right(document); // void 가 아니라 null 이다.
+    } on AppwriteException catch (e, st) {
+      return left(Failure(message: e.message.toString(), stackTrace: st));
+    } catch (e, st) {
+      return left(Failure(message: e.toString(), stackTrace: st));
+    }
+  }
+
+
+  @override
+  Stream<RealtimeMessage> getLatestUserProfileData() {
+    return _realtime.subscribe([
+      'databases.${AppWriteConstants.databaseId}.collections.${AppWriteConstants.usersCollection}.documents'
+    ]).stream;
   }
 }

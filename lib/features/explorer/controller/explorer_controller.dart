@@ -3,13 +3,13 @@ import 'package:twitter_clone/apis/user_api.dart';
 import 'package:twitter_clone/model/user_model.dart';
 
 
-final explorControllerProvider = StateNotifierProvider.autoDispose<ExplorerControllerStateNotifier, bool>((ref) {
+final explorerControllerProvider = StateNotifierProvider.autoDispose<ExplorerControllerStateNotifier, bool>((ref) {
   final userAPIProviderWatch = ref.watch(userAPIProvider);
   return ExplorerControllerStateNotifier(userAPI: userAPIProviderWatch);
 });
 
-final searchUserByNameProvider = FutureProvider.autoDispose.family((ref, String name) {
-  final explorerControllerProviderWatch = ref.watch(explorControllerProvider.notifier);
+final searchUserByNameProvider = FutureProvider.autoDispose.family((ref, String name)  {
+  final explorerControllerProviderWatch = ref.watch(explorerControllerProvider.notifier);
   return explorerControllerProviderWatch.searchUserByName(name);
 });
 
