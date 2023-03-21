@@ -5,7 +5,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:twitter_clone/core/core.dart';
 import 'package:twitter_clone/core/providers.dart';
 
-final authAPIProvider = Provider((ref) {
+final authAPIProvider = Provider.autoDispose((ref) {
   final account = ref.watch(appWriteAccountProvider);
   return AuthAPI(account: account);
 });

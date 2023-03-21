@@ -10,7 +10,7 @@ class ErrorText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(_errorMessage),
+      child: Wrap(children: [Text(_errorMessage)]),
     );
   }
 }
@@ -24,8 +24,10 @@ class ErrorPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: ErrorText(errorMessage: _errorMessage),
+    return Container(
+      child: Container(
+        height: 200,
+          child: SingleChildScrollView(child: ErrorText(errorMessage: _errorMessage))),
     );
   }
 }

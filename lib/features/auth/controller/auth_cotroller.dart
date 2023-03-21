@@ -20,7 +20,7 @@ import 'package:twitter_clone/model/user_model.dart';
 import '../view/signup_view.dart';
 
 
-final authControllerProvider = StateNotifierProvider<AuthController, bool>((ref) {
+final authControllerProvider = StateNotifierProvider.autoDispose<AuthController, bool>((ref) {
   return AuthController(
     authAPI: ref.watch(authAPIProvider),
     userAPI: ref.watch(userAPIProvider),

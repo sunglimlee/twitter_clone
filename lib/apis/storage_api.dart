@@ -8,7 +8,7 @@ import 'package:twitter_clone/core/providers.dart';
 // 나는 이번건은 provider 를 사용하지 않기로 한다.
 // 근데 이 StrorageAPI 는 하나의 객체로 계속 사용될 거잖아. 그래서 새로 생성해서 작업하는것 보다 그냥 사용되는게 더 낫지 않나?
 
-final storageAPIProvider = Provider((ref) {
+final storageAPIProvider = Provider.autoDispose((ref) {
   return StorageAPI(
       storage: ref
           .watch(appWriteStorageProvider)); // 이렇게 해놓으니깐 여기 객체의 함수에 한정이 되어버리네..

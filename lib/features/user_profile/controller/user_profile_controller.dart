@@ -18,20 +18,19 @@ final getDocumentByUserProvider =
 });
 
 final userProfileProvider =
-    StateNotifierProvider<UserProfileController, bool>((ref) {
+    StateNotifierProvider.autoDispose<UserProfileController, bool>((ref) {
   return UserProfileController(
       tweetAPI: ref.watch(tweetAPIProvider),
       storageAPI: ref.watch(storageAPIProvider),
       userAPI: ref.watch(userAPIProvider));
 });
 
-final getLatestUserProfileDataProvider = StreamProvider.autoDispose<RealtimeMessage>((ref) {
-  print('stream');
+// Realtime 만 공유하지 않으면 StreamProvider 도 아무 문제 없이 작동된다.
+final getLatestUserProfileDataProvider = StreamProvider((ref) {
   final userAPI = ref.watch(userAPIProvider);
-  var subscription = userAPI.getLatestUserProfileData();
-  return subscription;
-  //return realtimeMessage;
+  return userAPI.getLatestUserProfileData();
 });
+
 
 class UserProfileController extends StateNotifier<bool> {
   final StorageAPI _storageAPI;
@@ -62,7 +61,6 @@ class UserProfileController extends StateNotifier<bool> {
     required BuildContext context,
     required File? bannerFile,
     required File? profileFile,
-    required VoidCallback callback,
   }) async {
     state = true;
     if (bannerFile != null) {
@@ -84,11 +82,11 @@ class UserProfileController extends StateNotifier<bool> {
       showSnackBar(context, l.message.toString());
     }, (r) {
       {
-        callback();
         showSnackBar(context, 'Profile successfully updated. ${r.data}', );
         Navigator.pop(context);
       }
     });
 
   }
+
 }

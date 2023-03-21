@@ -11,20 +11,16 @@ import 'package:twitter_clone/theme/pallete.dart';
 
 class EditProfileView extends ConsumerStatefulWidget {
   final UserModel _userModel;
-  final VoidCallback _callback;
 
   EditProfileView({
     Key? key,
     required UserModel userModel,
-    required VoidCallback callback,
   })  : _userModel = userModel,
-  _callback = callback,
         super(key: key);
 
-  static route({required UserModel userModel, required VoidCallback callback}) => MaterialPageRoute(
+  static route({required UserModel userModel,}) => MaterialPageRoute(
         builder: (context) => EditProfileView(
           userModel: userModel,
-          callback: callback,
         ),
       );
 
@@ -43,9 +39,13 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     super.initState();
     if (widget._userModel.name != null) {
       nameController = TextEditingController(text: widget._userModel.name!);
+    } else {
+      nameController = TextEditingController();
     }
     if (widget._userModel.bio != null) {
       bioController = TextEditingController(text: widget._userModel.bio!);
+    } else {
+      bioController = TextEditingController();
     }
   }
 
@@ -87,7 +87,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
             onPressed: () {
               final UserModel tempUserModel = currentUser.value!.copyWith(name: nameController.text, bio: bioController.text);
               final res = ref.read(userProfileProvider.notifier);
-              res.updateUserModel(userModel: tempUserModel, context: context, bannerFile: bannerPicture, profileFile: profilePicture, callback : widget._callback);
+              res.updateUserModel(userModel: tempUserModel, context: context, bannerFile: bannerPicture, profileFile: profilePicture);
             },
             child: const Text('Save'),
           ),

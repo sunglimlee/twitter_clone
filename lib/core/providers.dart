@@ -14,7 +14,7 @@ final appWriteClientProvider = Provider<Client>((ref) {
   return client;
 }); // selfSigned 가 뭐지?
 
-final appWriteAccountProvider = Provider<Account>((ref) {
+final appWriteAccountProvider = Provider.autoDispose<Account>((ref) {
   final appWriteClientWatch = ref.watch(appWriteClientProvider);
   return Account(appWriteClientWatch);
 });
@@ -24,7 +24,7 @@ final appWriteDatabasesProvider = Provider<Databases>((ref) {
 });
 
 // state 프로바이더, 이거 잘못됐네.. 이렇게 하면 안되네.. StateNotifier 를 상속 받으면 사용할 수 있네..
-final sessionStateProvider = StateProvider<models.Session?>((ref) {
+final sessionStateProvider = StateProvider.autoDispose<models.Session?>((ref) {
   models.Session? session;
   return session;
 });
@@ -32,13 +32,13 @@ final sessionStateProvider = StateProvider<models.Session?>((ref) {
 
 
 // storage provider
-final appWriteStorageProvider = Provider<Storage>((ref) {
+final appWriteStorageProvider = Provider.autoDispose<Storage>((ref) {
   final appWriteClientWatch = ref.watch(appWriteClientProvider);
   return Storage(appWriteClientWatch);
 });
 
 // Realtime
-final appWriteRealtimeProvider = Provider<Realtime>((ref) {
+final appWriteRealtimeProvider = Provider((ref) {
   final appWriteClientWatch = ref.watch(appWriteClientProvider);
   return Realtime(appWriteClientWatch);
 });
