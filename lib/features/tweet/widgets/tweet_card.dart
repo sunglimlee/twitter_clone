@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:any_link_preview/any_link_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -93,7 +91,8 @@ class TweetCard extends ConsumerWidget {
                                 ),
                               Row(children: [
                                 Container(
-                                  margin: const EdgeInsets.only(right: 5),
+
+                                  margin: EdgeInsets.only(right: userModel.isTwitterBlue ? 1 : 5),
                                   child: Text(
                                     userModel.name!,
                                     style: const TextStyle(
@@ -101,6 +100,12 @@ class TweetCard extends ConsumerWidget {
                                         fontSize: 17),
                                   ),
                                 ),
+                                if (userModel.isTwitterBlue)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 5),
+                                    child: SvgPicture.asset(AssetsConstants.verifiedIcon),
+                                  ),
+
                                 Text(
                                   '@${userModel.name!} · ${timeago.format(_tweetModel.tweetAt, locale: 'en_short')} ׄ',
                                   style: const TextStyle(

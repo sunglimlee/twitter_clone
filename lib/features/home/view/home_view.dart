@@ -1,10 +1,9 @@
-import 'package:appwrite/models.dart' as model;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:twitter_clone/constants/constants.dart';
-import 'package:twitter_clone/core/providers.dart';
+import 'package:twitter_clone/features/home/widgets/side_drawer.dart';
 import 'package:twitter_clone/features/tweet/view/create_tweet_view.dart';
 import 'package:twitter_clone/theme/pallete.dart';
 
@@ -41,6 +40,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
     // print('SessionSP 값: ${session?.userId??"세션값이 없군요."}');
     return Scaffold(
       appBar: _page == 0 ? appBar : null, // 이렇게 build 함수 밖에 변수를 두고 사용하면 rebuild 를 줄여준다.
+      drawer: const SiderDrawer(),
       body: Center(
         child: IndexedStack(
           index: _page,

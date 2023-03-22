@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:twitter_clone/common/common.dart';
+import 'package:twitter_clone/constants/assets_constants.dart';
 import 'package:twitter_clone/features/auth/controller/auth_cotroller.dart';
 import 'package:twitter_clone/features/tweet/widgets/tweet_card.dart';
 import 'package:twitter_clone/features/user_profile/controller/user_profile_controller.dart';
@@ -96,10 +98,19 @@ class UserProfile extends ConsumerWidget {
                   sliver: SliverList(
                     delegate: SliverChildListDelegate(
                       [
-                        Text(
-                          _userModel.name ?? '',
-                          style: const TextStyle(
-                              fontSize: 25, fontWeight: FontWeight.bold),
+                        Row(
+                          children: [
+                            Text(
+                              _userModel.name ?? '',
+                              style: const TextStyle(
+                                  fontSize: 25, fontWeight: FontWeight.bold),
+                            ),
+                            if (_userModel.isTwitterBlue)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 5),
+                                child: SvgPicture.asset(AssetsConstants.verifiedIcon),
+                              )
+                          ],
                         ),
                         Text(
                           '@${_userModel.name ?? ''}',

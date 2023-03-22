@@ -168,6 +168,7 @@ class AuthController extends StateNotifier<bool> {
   void logout(BuildContext context) async {
     final res = await _authAPI.logout();
     res.fold((l) => null, (r) {
+      // 여기서 navigate 를 하는구나.
       Navigator.pushAndRemoveUntil(
         context,
         SignUpView.route(),
