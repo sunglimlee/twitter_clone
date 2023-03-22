@@ -8,6 +8,8 @@ class AppWriteConstants {
       '640606de3ad71ab7097a'; // 서버의 databases/twitter test 데이터베이스/users 컬렉션 만들었다.
   static const String tweetsCollection =
       '6408cb6a94b7aa8e78c5'; // 서버의 databases/twitter test 데이터베이스/users 컬렉션 만들었다.
+  static const String notificationsCollection =
+      '641a2d9557e94daeb8d4'; // 서버의 databases/twitter test 데이터베이스/users 컬렉션 만들었다.
   static const String imagesBucket =
       '640b8375bea137cf267f'; // 서버의 databases/twitter test 데이터베이스/users 컬렉션 만들었다.
 

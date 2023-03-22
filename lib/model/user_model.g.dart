@@ -20,17 +20,17 @@ _$_UserModel _$$_UserModelFromJson(Map<String, dynamic> json) => _$_UserModel(
       uid: json['uid'] as String?,
       bio: json['bio'] as String?,
       isTwitterBlue: json['is_twitter_blue'] as bool? ?? false,
-    );
+);
 
 Map<String, dynamic> _$$_UserModelToJson(_$_UserModel instance) =>
     <String, dynamic>{
-      'email': instance.email,
-      'name': instance.name,
-      'followers': instance.followers,
-      'following': instance.following,
-      'profile_pic': instance.profilePic,
-      'banner_pic': instance.bannerPic,
-      'uid': instance.uid,
-      'bio': instance.bio,
-      'is_twitter_blue': instance.isTwitterBlue,
+          'email': instance.email,
+          'name': instance.name,
+          'followers': instance.followers,
+          'following': instance.following,
+          'profile_pic': instance.profilePic,
+          'banner_pic': instance.bannerPic,
+          'uid': instance.uid,
+          'bio': instance.bio,
+          'is_twitter_blue': instance.isTwitterBlue,
     };

@@ -253,8 +253,7 @@ class __$$_TweetModelCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(fieldRename: FieldRename.snake, explicitToJson: true)
+@JsonSerializable()
 class _$_TweetModel implements _TweetModel {
   const _$_TweetModel(
       {required this.text,

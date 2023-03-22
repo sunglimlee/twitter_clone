@@ -10,6 +10,7 @@ import 'package:twitter_clone/model/tweet_model.dart';
 final tweetAPIProvider = Provider.autoDispose<TweetAPI>((ref) {
   final db = ref.watch(appWriteDatabasesProvider);
   final realTime = ref.watch(appWriteRealtimeProvider);
+
   return TweetAPI(db: db, realtime: realTime);
 });
 
@@ -31,6 +32,8 @@ abstract class ITweetAPI {
   Future<model.Document> getDocumentByDocumentId(String documentId);
 
   Future<List<model.Document>> getDocumentsByUser(String uid);
+
+  Future<List<model.Document>> getTweetModelByHashTag(String hashTag);
 }
 
 class TweetAPI implements ITweetAPI {
@@ -164,5 +167,18 @@ class TweetAPI implements ITweetAPI {
           // 이걸 실수했네. id 와 매치가 되어야지..
         ]);
     return documents.documents;
+  }
+
+  @override
+  Future<List<model.Document>> getTweetModelByHashTag(String hashTag) async {
+    final documents = await _db.listDocuments(
+        databaseId: AppWriteConstants.databaseId,
+        collectionId: AppWriteConstants.tweetsCollection,
+        queries: [
+          Query.search('hashTags', hashTag), // 아주 좋은 맘에드는 기능이다. search 자주 써야지..
+          // 이걸 실수했네. id 와 매치가 되어야지..
+        ]);
+    return documents.documents;
+
   }
 }

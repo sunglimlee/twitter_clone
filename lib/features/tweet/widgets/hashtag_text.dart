@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:twitter_clone/features/tweet/view/hashtag_tweet_view.dart';
 import 'package:twitter_clone/theme/pallete.dart';
 
 class HashtagText extends StatelessWidget {
@@ -11,11 +13,14 @@ class HashtagText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<TextSpan> textSpans = [];
-    _text.split(' ').forEach((element) {
+    _text.split(' ').forEach((element) { // 여기서도 리스트를 이용해서 hashtag 를 나누고 그 해시태그를 이용해서 작업하는걸 보여주고 있다.
       if (element.startsWith('#')) {
         textSpans.add(
           TextSpan(
               text: '$element ',
+              recognizer: TapGestureRecognizer()..onTap = () {
+              Navigator.push(context, HashtagTweetView.route(hashtag: element),);
+          },
               style: const TextStyle(
                   color: Pallete.blueColor,
                   fontSize: 18,

@@ -28,7 +28,12 @@ class TweetList extends ConsumerWidget {
               'databases.*.collections.${AppWriteConstants.tweetsCollection}.documents.*.create',
             )) {
               // 여기 데이터 값이 나온거다. 메모리 어딘가에 저장되어 있고 이건 바뀌질 않았지..
-              tweets.insert(0, TweetModel.fromJson(data.payload));
+              // 하나 물어보자. 여기 Future 로 들어온 데이터 tweets 은 immutable 이니? 아니지! 메모리에 만들어져서 그냥 있는거지
+              // 그걸 build 를 통해서 보여주고 있는거잖아... 맞지..
+              // 근데 새로운 데이터가 있어서 tweets 에 추가를 해줄 수 있잖아.. 맞지?
+              // 그러헥 데이터를 추가하면 지금 when 으로 이데이터가 바뀔 때 마다 새로 고침이 일어날 텐데 여기서 추가를 시켜주니깐 다시 build 가 실행된다. 맞지..
+
+              tweets.insert(0, TweetModel.fromJson(data.payload)); // 인서트를 하는순간 다시 build 가 된다.
             } else if (data.events.contains(
               'databases.*.collections.${AppWriteConstants.tweetsCollection}.documents.*.update',
             )) {

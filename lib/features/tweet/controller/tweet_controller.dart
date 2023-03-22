@@ -3,13 +3,16 @@ import 'dart:io';
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twitter_clone/apis/notification_api.dart';
 import 'package:twitter_clone/apis/storage_api.dart';
 import 'package:twitter_clone/apis/tweet_api.dart';
 import 'package:twitter_clone/common/common.dart';
+import 'package:twitter_clone/core/enums/notification_type_enum.dart';
 import 'package:twitter_clone/core/enums/tweet_type_enum.dart';
 import 'package:twitter_clone/core/providers.dart';
 import 'package:twitter_clone/core/utils.dart';
 import 'package:twitter_clone/features/auth/controller/auth_cotroller.dart';
+import 'package:twitter_clone/features/notifications/controller/notification_controller.dart';
 import 'package:twitter_clone/model/tweet_model.dart';
 import 'package:appwrite/models.dart' as model;
 import 'package:twitter_clone/model/user_model.dart';
@@ -18,6 +21,8 @@ import 'package:twitter_clone/model/user_model.dart';
 final tweetStateNotifierProvider =
     StateNotifierProvider.autoDispose<TweetControllerNotifier, bool>((ref) =>
         TweetControllerNotifier(
+            notificationController:
+                ref.watch(notificationControllerProvider.notifier),
             ref: ref,
             tweetAPI: ref.watch(tweetAPIProvider),
             storageAPI: ref.watch(storageAPIProvider)));
@@ -29,7 +34,7 @@ final getTweetsProvider = FutureProvider.autoDispose((ref) {
   return tweetStateNotifierWatch.getTweetDocuments();
 });
 
-/* 뭔가 문제인지 모르겟다.*/
+/* 뭔가 문제인지 모르겟다. Realtime 은 Provider 로 공유하면 안되었다. 새로 만들어서 해야 했다.*/
 final getLatestTweetProvider =
     StreamProvider.autoDispose<RealtimeMessage>((ref) {
   // 여기서는 특이하게도 api 에서 바로 받네.. 언제는 바로 받는거 하지 말라고 하더만...
@@ -38,6 +43,15 @@ final getLatestTweetProvider =
   final tweetApiWatch = ref.watch(tweetAPIProvider);
   return tweetApiWatch.getLatestTweet();
 });
+
+// 이걸 만들줄 알지만 안돌리면 안 올라갈거잖아.. 그러니깐 그냥 그대로 두고
+final getTweeModelByHashTagProvider = FutureProvider.autoDispose.family<List<TweetModel>, String>((ref, hashTag) {
+  final tweetControllerNotifierProviderWatch = ref.watch(tweetStateNotifierProvider.notifier);
+  return tweetControllerNotifierProviderWatch.getTweetModelByHashTag(hashTag: hashTag);
+});
+
+
+
 
 /// 이 provider 는 만들기만 하고 안쓸거다. 나는 그냥 TweetcControllerNotifier 에서 바로 쓸래..
 final getRepliedToTweetProvider =
@@ -72,14 +86,17 @@ class TweetControllerNotifier extends StateNotifier<bool> {
   final TweetAPI _tweetAPI;
   final StorageAPI _storageAPI;
   final Ref _ref; // 여기서 만들 때 ref 를 어떻게 넣는지 보자.. 아마도 provider 에서 값을 넣을 것 같지..
+  final NotificationController _notificationController;
 
   TweetControllerNotifier(
       {required Ref ref,
       required TweetAPI tweetAPI,
+      required NotificationController notificationController,
       required StorageAPI storageAPI})
       : _ref = ref,
         _tweetAPI = tweetAPI,
         _storageAPI = storageAPI,
+        _notificationController = notificationController,
         super(false);
 
   /// 트윗 도큐먼트를 받는다.
@@ -101,15 +118,16 @@ class TweetControllerNotifier extends StateNotifier<bool> {
     required String text,
     required BuildContext context,
     required String? repliedTo, // tweet ID 가 들어가야 한다.
+    required String repliedToUserId,
   }) {
     if (text.isEmpty) {
       showSnackBar(context, 'Please Enter Text');
     }
     if (images.isNotEmpty) {
       _shareImageTweet(
-          images: images, text: text, context: context, repliedTo: repliedTo);
+          images: images, text: text, context: context, repliedTo: repliedTo, repliedToUserId: repliedToUserId);
     } else {
-      _shareTextTweet(text: text, context: context, repliedTo: repliedTo);
+      _shareTextTweet(text: text, context: context, repliedTo: repliedTo, repliedToUserId: repliedToUserId);
     }
   }
 
@@ -117,7 +135,10 @@ class TweetControllerNotifier extends StateNotifier<bool> {
   void _shareTextTweet(
       {required String text,
       required BuildContext context,
-      required String? repliedTo}) async {
+      required String? repliedTo,
+        required String repliedToUserId,
+
+      }) async {
     //_ref.invalidate(tweetStateNotifierProvider);
     state = true;
     final hashTags = _getHashTagsFromText(text);
@@ -125,7 +146,8 @@ class TweetControllerNotifier extends StateNotifier<bool> {
     // 이부분 너무나도 중요하고 아름다운 부분이다. 왜냐면 너도 알다시피 AsyncData 값을 받으면 다음으로 계속 넘어가고 다음번에 데이터가 들어왔을 때 처리하는데
     // 이경우에는 uid 값이 존재하지 않는 상태에서 TweetModel 의 객체가 만들어지는거지.. 값이 완전히 받아지고 나서 들어오도록 해야하는데..
     // 그래서 아래처럼 .future 를 사용하면 await 로 기다리게 할 수 있잖아..
-    final uid = await _ref.read(currentUserIdProvider.future);
+    final userModel = await _ref.read(currentUserDetailsProvider.future);
+    final uid = userModel!.uid; // 무조건 들어간다.
     print(uid);
     TweetModel tweetModel = TweetModel(
         text: text,
@@ -144,11 +166,20 @@ class TweetControllerNotifier extends StateNotifier<bool> {
     // 여기서부터 Either 부분 처리해야 한다.
     // 중요한건 fold 도 리턴값이 있다. 그래서 reply 에 관련된 부분이 들어갈 텐데 지금은 그냥 null 을 리턴해도 된다.
     // 재밌는 사실은 fpdart 에서 사용되는 fold 함수가 정작 양쪽에서 리턴되는 갑은 C 로 같다는 사실
-    state = false;
     print('res 값 ${res}');
     res.fold((l) => showSnackBar(context, l.message), (r) {
       //_ref.refresh(tweetStateNotifierProvider);
+      if (repliedToUserId.isNotEmpty) {
+        _notificationController.createNotification(
+            text: '${userModel.name} replied to your tweet',
+            postId: r.$id, // 이부분 똑똑하네..
+            notificationType: NotificationType.reply,
+            context: context,
+            uid: repliedToUserId); // 아무것도 보여줄게 없고..
+
+      }
     });
+    state = false;
   }
 
   void _shareImageTweet({
@@ -156,6 +187,7 @@ class TweetControllerNotifier extends StateNotifier<bool> {
     required String text,
     required BuildContext context,
     required String? repliedTo,
+    required String repliedToUserId,
   }) async {
     // 여기 image 는 조금 다르게 저장이 될 거다. 절차를 잘보고 결정하도록 하자.
     // Storage 에 저장이 될거고..
@@ -165,7 +197,8 @@ class TweetControllerNotifier extends StateNotifier<bool> {
     // 이부분 너무나도 중요하고 아름다운 부분이다. 왜냐면 너도 알다시피 AsyncData 값을 받으면 다음으로 계속 넘어가고 다음번에 데이터가 들어왔을 때 처리하는데
     // 이경우에는 uid 값이 존재하지 않는 상태에서 TweetModel 의 객체가 만들어지는거지.. 값이 완전히 받아지고 나서 들어오도록 해야하는데..
     // 그래서 아래처럼 .future 를 사용하면 await 로 기다리게 할 수 있잖아..
-    final uid = await _ref.read(currentUserIdProvider.future);
+    final userModel = await _ref.read(currentUserDetailsProvider.future);
+    final uid = userModel!.uid;
     print(uid);
     final imageLinks = await _storageAPI.upLoadImage(images);
     TweetModel tweetModel = TweetModel(
@@ -186,11 +219,21 @@ class TweetControllerNotifier extends StateNotifier<bool> {
     // 여기서부터 Either 부분 처리해야 한다.
     // 중요한건 fold 도 리턴값이 있다. 그래서 reply 에 관련된 부분이 들어갈 텐데 지금은 그냥 null 을 리턴해도 된다.
     // 재밌는 사실은 fpdart 에서 사용되는 fold 함수가 정작 양쪽에서 리턴되는 갑은 C 로 같다는 사실
-    state = false;
     print('res 값 ${res}');
     res.fold((l) => showSnackBar(context, l.message), (r) {
-      return null;
-    });
+      if (repliedToUserId.isNotEmpty) {
+        _notificationController.createNotification(
+            text: '${userModel.name} replied to your tweet',
+            postId: r.$id,
+            // 이부분 똑똑하네..
+            notificationType: NotificationType.reply,
+            context: context,
+            uid: repliedToUserId); // 아무것도 보여줄게 없고..
+      }
+    }
+
+      );
+    state = false;
   }
 
   String _getLinkFromText(String text) {
@@ -217,7 +260,7 @@ class TweetControllerNotifier extends StateNotifier<bool> {
     return hashTags;
   }
 
-  void likeTweet(TweetModel tweetModel, UserModel userModel) async {
+  void likeTweet(TweetModel tweetModel, UserModel userModel, BuildContext context) async {
 //    print('userModel.uid! ${userModel.uid ?? 'userModel.uid 의 값이 존재하지 않습니다.'}: (likeTweet)[tweet_controller.dart]');
 //    print('tweetModel (likeTweet)[tweet_controller] ${tweetModel.toString()}');
     List<String> likes = [];
@@ -252,7 +295,12 @@ class TweetControllerNotifier extends StateNotifier<bool> {
     res.fold((l) {
       return null; // 아무것도 보여줄게 없다.
     }, (r) {
-      return null; // 아무것도 보여줄게 없고..
+      _notificationController.createNotification(
+          text: '${userModel.name} liked your tweet',
+          postId: tweetModel.id!,
+          notificationType: NotificationType.like,
+          context: context,
+          uid: tweetModel.uid); // 아무것도 보여줄게 없고..
     });
 
     // likes.add(userModel.uid!); // 여기는 null 이 되면 안되지..
@@ -277,7 +325,15 @@ class TweetControllerNotifier extends StateNotifier<bool> {
         tweetModel2,
       );
       res2.fold((l) => showSnackBar(context, l.message.toString()),
-          (r) => showSnackBar(context, 'retweeted successfully'));
+          (r) {
+            _notificationController.createNotification(
+                text: '${userModel.name} reshared your tweet',
+                postId: tweetModel.id!,
+                notificationType: NotificationType.retweet,
+                context: context,
+                uid: tweetModel.uid); // 아무것도 보여줄게 없고..
+
+            showSnackBar(context, 'retweeted successfully');});
     });
   }
 
@@ -296,4 +352,15 @@ class TweetControllerNotifier extends StateNotifier<bool> {
       }).toList();
     });
   }
+
+  Future<List<TweetModel>> getTweetModelByHashTag({
+    required String hashTag,
+  }) async {
+
+    final res = await _tweetAPI.getTweetModelByHashTag(hashTag);
+    return res.map((e) => TweetModel.fromJson(e.data)).toList();
+  }
+
 }
+
+

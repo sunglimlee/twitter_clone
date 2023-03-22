@@ -119,7 +119,7 @@ class TwitterReplyScreen extends ConsumerWidget {
           child: TextField(
             onSubmitted: (text) {
               ref.read(tweetStateNotifierProvider.notifier).shareTweet(
-                  images: [], text: text, context: context, repliedTo:_tweetModel.id);
+                  images: [], text: text, context: context, repliedTo:_tweetModel.id, repliedToUserId: _tweetModel.uid);
             },
             decoration: const InputDecoration(hintText: 'Tweet your reply'),
           ),

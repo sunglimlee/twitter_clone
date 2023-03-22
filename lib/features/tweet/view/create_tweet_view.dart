@@ -34,7 +34,7 @@ class _CreateTweetScreenState extends ConsumerState<CreateTweetScreen> {
 
   void shareTweet() {
     ref.read(tweetStateNotifierProvider.notifier).shareTweet(
-        images: images, text: tweetTextController.text, context: context, repliedTo: null);
+        images: images, text: tweetTextController.text, context: context, repliedTo: null, repliedToUserId: '');
     // 여기는 말 그래도 화면상이니깐 여기서 Navigation 하는게 맞지.
     Navigator.pop(context);
   }

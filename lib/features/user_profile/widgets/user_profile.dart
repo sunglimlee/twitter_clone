@@ -12,8 +12,10 @@ import 'package:twitter_clone/theme/pallete.dart';
 class UserProfile extends ConsumerWidget {
   final UserModel _userModel;
 
-  const UserProfile({Key? key, required UserModel userModel,})
-      : _userModel = userModel,
+  const UserProfile({
+    Key? key,
+    required UserModel userModel,
+  })  : _userModel = userModel,
         super(key: key);
 
   @override
@@ -37,7 +39,10 @@ class UserProfile extends ConsumerWidget {
                             ? Container(
                                 color: Pallete.blueColor,
                               )
-                            : Image.network(_userModel.bannerPic!, fit: BoxFit.fitWidth,),
+                            : Image.network(
+                                _userModel.bannerPic!,
+                                fit: BoxFit.fitWidth,
+                              ),
                       ),
                       Positioned(
                         bottom: 0, // 현재 SliverAppBar 의 최대 크기의 맨마지막으로 부터 붙는다.
@@ -60,14 +65,25 @@ class UserProfile extends ConsumerWidget {
                                       horizontal: 25)),
                               onPressed: () {
                                 if (currentUser.uid == _userModel.uid) {
+                                  // edit profile
                                   Navigator.push(
-                                    context, EditProfileView.route(userModel: _userModel,));
+                                      context,
+                                      EditProfileView.route(
+                                        userModel: _userModel,
+                                      ));
+                                } else {
+                                  ref
+                                      .read(userProfileProvider.notifier)
+                                      .followingUser(
+                                          tweetUser: _userModel,
+                                          context: context,
+                                          currentUser: currentUser);
                                 }
                               },
                               child: Text(
                                 currentUser.uid == _userModel.uid
                                     ? 'Edit Profile'
-                                    : 'Follow',
+                                    : currentUser.following == null ? 'follow' : currentUser.following!.contains(_userModel.uid) ? 'unfollow' : 'follow',
                                 style: const TextStyle(
                                   color: Pallete.whiteColor,
                                 ),
@@ -146,15 +162,6 @@ class UserProfile extends ConsumerWidget {
             }));
   }
 }
-
-
-
-
-
-
-
-
-
 
 /* 원본
 

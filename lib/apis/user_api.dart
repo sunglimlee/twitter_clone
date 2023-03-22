@@ -29,6 +29,9 @@ abstract class IUserAPI {
   FutureEitherVoid updateUserData(UserModel userModel);
 
   Stream<RealtimeMessage> getLatestUserProfileData();
+
+  FutureEitherVoid followersUser(UserModel user);
+  FutureEitherVoid addToFollowing(UserModel user);
 }
 
 // 이말은 interface 라는 뜻이네.. 상속과 관련없이 마음대로 만들 수 있는거 알지?
@@ -135,6 +138,47 @@ class UserAPI implements IUserAPI {
       'databases.${AppWriteConstants.databaseId}.collections.${AppWriteConstants.usersCollection}.documents'
     ]).stream;
   }
+
+  @override
+  FutureEitherVoid followersUser(UserModel user) async {
+    try {
+      final document = await _db.updateDocument(
+          databaseId: AppWriteConstants.databaseId,
+          collectionId: AppWriteConstants.usersCollection,
+          documentId: user.uid!,
+          data: {
+            'followers' : user.followers
+          });
+      return right(document); // void 가 아니라 null 이다.
+    } on AppwriteException catch (e, st) {
+      return left(Failure(message: e.message.toString(), stackTrace: st));
+    } catch (e, st) {
+      return left(Failure(message: e.toString(), stackTrace: st));
+    }
+
+  }
+
+  @override
+  FutureEitherVoid addToFollowing(UserModel user) async {
+    try {
+      final document = await _db.updateDocument(
+          databaseId: AppWriteConstants.databaseId,
+          collectionId: AppWriteConstants.usersCollection,
+          documentId: user.uid!,
+          data: {
+            'following' : user.following
+          });
+      return right(document); // void 가 아니라 null 이다.
+    } on AppwriteException catch (e, st) {
+      return left(Failure(message: e.message.toString(), stackTrace: st));
+    } catch (e, st) {
+      return left(Failure(message: e.toString(), stackTrace: st));
+    }
+
+
+  }
+
+
 }
 
 

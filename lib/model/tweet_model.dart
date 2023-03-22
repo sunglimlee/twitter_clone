@@ -7,7 +7,6 @@ part 'tweet_model.g.dart';
 @freezed
 @immutable // 이거 꼭 해주어야 한다. 그래야 복사하고 하는데 문제가 없다.
 class TweetModel with _$TweetModel {
-  @JsonSerializable(fieldRename: FieldRename.snake, explicitToJson: true)
   const factory TweetModel({
     required String text,
     List<String>? hashTags,

@@ -200,7 +200,7 @@ class TweetCard extends ConsumerWidget {
                                                 ref
                                                     .watch(userDetailsProvider(
                                                         currentUserId))
-                                                    .value!);
+                                                    .value!, context);
                                         print(
                                             'LikeButton 의 return 바로전 isLiked 값 : ${isLiked}');
                                         return !isLiked; // 이거 없어도 되지만 그냥 너무 빠르게 지나가지..
